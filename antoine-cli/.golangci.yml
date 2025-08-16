@@ -1,0 +1,87 @@
+linters-settings:
+  dupl:
+    threshold: 100
+  exhaustive:
+    default-signifies-exhaustive: false
+  funlen:
+    lines: 100
+    statements: 50
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/your-org/antoine-cli) # Replace with your actual module path
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+  gocyclo:
+    min-complexity: 15
+  govet:
+    enable:
+      - fieldalignment
+      - shadow
+  lll:
+    line-length: 140
+  misspell:
+    locale: US
+  nolintlint:
+    allow-leading-space: true
+    allow-unused: false
+    require-explanation: false
+    require-specific: false
+  staticcheck:
+    checks: ["all"]
+
+formatters:
+  enable:
+    - goimports
+  goimports:
+    local-prefixes: github.com/your-org/antoine-cli # Replace with your actual module path
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - errcheck
+    - exhaustive
+    - funlen
+    - goconst
+    - gocritic
+    - gocyclo
+    - gosec
+    - govet
+    - ineffassign
+    - lll
+    - misspell
+    - nakedret
+    - nolintlint
+    - rowserrcheck
+    - staticcheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+
+issues:
+  exclude-use-default: false
+  exclude-dirs:
+    - .github
+    - scripts
+    - docs
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen
+        - gomnd # Included in case you want to re-enable gomnd later
+
+version: '2'
+run:
+  timeout: 5m
+  modules-download-mode: readonly
