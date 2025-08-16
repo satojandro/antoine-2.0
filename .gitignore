@@ -1,0 +1,117 @@
+# --- macOS specific ---
+.DS_Store
+.localized
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+__MACOSX
+Icon?
+desktop.ini
+Thumbs.db
+
+# --- Go specific ---
+# Go binaries and packages
+*.exe
+*.test
+*.prof
+*.out
+/bin/
+/pkg/
+/src/
+# Local vendor directory (Go modules)
+/vendor/
+# Go module cache
+/go.mod
+/go.sum
+/go.work
+/go.work.sum
+/go.work.lock
+
+# --- Docker specific ---
+# Docker build context
+.dockerignore
+# Docker build cache
+.docker/
+# Docker images, containers, and volumes
+!docker-compose.yml
+!Dockerfile
+!docker-compose.*.yml
+.env
+.env.*
+*.log
+*/build/
+
+# --- IDEs and Editors ---
+# JetBrains (IntelliJ, GoLand, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+# VS Code
+.vscode/
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+# Atom
+.atom/
+
+# --- Node.js specific ---
+# Node modules
+node_modules/
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# --- Python specific ---
+# Byte-compiled files
+__pycache__/
+*.pyc
+# Virtual environments
+venv/
+.venv/
+env/
+# Pip
+pip-log.txt
+pip-delete-this-directory.txt
+# Anaconda
+.anaconda/
+.ipynb_checkpoints/
+
+# --- General Development ---
+# Binaries and executables
+*.exe
+*.o
+*.out
+*.so
+*.dll
+*.class
+# Log files
+*.log
+# Backup files
+*~
+# Temp files
+*.tmp
+# Configuration files
+.env
+.env.*.local
+.env.production.local
+.env.development.local
+# Test reports
+/coverage/
+.nyc_output/
+
+# --- Compressed archives ---
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+# Other common files
+*.swp
