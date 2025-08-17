@@ -1,0 +1,328 @@
+# Antoine CLI - Development Configuration
+# This configuration extends the default settings for development environment
+# It enables debug features, mock services, and development-friendly settings
+
+# Inherit from default configuration
+extends: "default.yaml"
+
+# Development-specific app settings
+app:
+  name: "antoine-cli-dev"
+  version: "1.0.0-dev"
+  description: "Your Ultimate Hackathon Mentor (Development Build)"
+
+# Development API settings
+api:
+  base_url: "http://localhost:3000"  # Local development server
+  timeout: "60s"  # Longer timeout for debugging
+  retry_count: 1  # Fewer retries for faster feedback
+  retry_delay: "500ms"
+  rate_limit: 1000  # Higher rate limit for development
+
+# MCP Server configuration for development
+mcp:
+  timeout: "60s"  # Longer timeout for debugging
+  retry_count: 1
+  retry_delay: "1s"
+
+  servers:
+    exa:
+      endpoint: "mcp://localhost:8001"
+      enabled: true
+      timeout: "60s"
+
+    github:
+      endpoint: "mcp://localhost:8002"
+      enabled: true
+      timeout: "90s"
+
+    deepwiki:
+      endpoint: "mcp://localhost:8003"
+      enabled: true
+      timeout: "120s"
+
+    e2b:
+      endpoint: "mcp://localhost:8004"
+      enabled: true
+      timeout: "180s"  # Longer for development/debugging
+
+    browserbase:
+      endpoint: "mcp://localhost:8005"
+      enabled: true  # Enabled in development
+      timeout: "120s"
+
+    firecrawl:
+      endpoint: "mcp://localhost:8006"
+      enabled: true  # Enabled in development
+      timeout: "90s"
+
+# Development UI settings
+ui:
+  theme: "dark"
+  animations: true  # Keep animations for testing
+  ascii_art: true
+  colors: true
+  unicode_support: true
+
+  # Development layout settings
+  max_width: 140  # Wider for development screens
+  max_height: 40  # Taller for development
+
+  # Show all debugging helpers
+  show_help_hints: true
+  show_key_bindings: true
+  confirm_destructive_actions: false  # Faster development workflow
+
+  # Table settings for development
+  table:
+    max_rows: 50  # More rows for testing
+    show_borders: true
+    zebra_striping: true
+    sortable: true
+
+  # Progress settings
+  progress:
+    show_percentage: true
+    show_eta: true
+    animation_speed: "50ms"  # Faster animations
+
+# Development cache settings
+cache:
+  enabled: true
+  type: "memory"  # Memory cache for faster development
+  max_size_mb: 200  # Larger cache for development
+
+  # Shorter TTL for development testing
+  ttl:
+    hackathons: "5m"   # Shorter for testing
+    projects: "10m"
+    repositories: "15m"
+    trends: "30m"
+    analysis: "1h"     # Shorter for testing analysis changes
+    search_results: "2m"
+
+  cleanup_interval: "5m"  # More frequent cleanup
+  max_entries: 500
+
+# Development logging
+logging:
+  level: "debug"  # Verbose logging for development
+  format: "text"  # Human-readable format
+  output: "stderr"
+
+  # Enable development logging features
+  development: true
+  caller: true        # Show file and line number
+  stack_trace: true   # Show stack traces on errors
+
+  file:
+    path: "./logs/antoine-dev.log"  # Local log file
+    max_size_mb: 50   # Larger log files for development
+    max_backups: 10
+    max_age_days: 7   # Shorter retention
+    compress: false   # Uncompressed for easier reading
+
+# Analytics disabled for development
+analytics:
+  enabled: false  # Disable analytics in development
+  anonymous: true
+
+  collect:
+    usage_stats: false
+    performance_metrics: false
+    error_reports: false
+    feature_usage: false
+
+# Development search settings
+search:
+  default_limit: 10  # Smaller limits for faster testing
+  max_limit: 50
+
+  hackathons:
+    sort_by: "start_date"
+    sort_order: "desc"
+    include_past: true     # Include past events for testing
+    include_virtual: true
+    min_prize: 0
+
+  projects:
+    sort_by: "recent"     # Recent for development testing
+    sort_order: "desc"
+    include_forks: true   # Include forks for more test data
+    min_stars: 0
+
+# Development analysis settings
+analysis:
+  repository:
+    max_file_size_mb: 50  # Larger files for development
+    max_files: 5000       # More files for testing
+    include_dependencies: true
+    include_security: true
+    include_performance: true
+
+    analyze_code: true
+    analyze_docs: true
+    analyze_config: true
+
+    shallow_clone: false  # Full clone for development testing
+    max_commit_history: 500
+
+  trends:
+    default_timeframe: "1month"  # Shorter for faster testing
+    min_data_points: 5
+    confidence_threshold: 0.6    # Lower threshold for testing
+
+  parallel_analysis: true
+  max_concurrent_jobs: 2  # Fewer concurrent jobs for debugging
+  timeout: "30m"          # Longer timeout for development
+
+# Development mentor settings
+mentor:
+  model: "gpt-3.5-turbo"  # Faster/cheaper model for development
+  max_tokens: 1024        # Smaller responses for faster testing
+  temperature: 0.5
+
+  max_history: 20         # Shorter history for testing
+  context_window: 5
+  save_conversations: true
+
+  personality: "casual"   # Casual for development
+  expertise_level: "intermediate"
+
+  code_examples: true
+  step_by_step: true
+  provide_resources: true
+
+  session_timeout: "10m"  # Shorter timeout for development
+  auto_save: true
+
+# Relaxed security for development
+security:
+  credentials:
+    storage: "file"       # File storage for easier development
+    encryption: false     # Disabled for easier debugging
+    auto_refresh: false
+
+  api:
+    verify_ssl: false     # Allow self-signed certs in development
+    timeout: "60s"
+    max_redirects: 5
+
+  data:
+    anonymize_logs: false # Keep full data for debugging
+    encrypt_cache: false
+    secure_delete: false
+
+# Development performance settings
+performance:
+  max_goroutines: 5      # Fewer goroutines for easier debugging
+  worker_pool_size: 2
+
+  max_memory_mb: 1024    # More memory for development
+  gc_percentage: 50      # More aggressive GC for testing
+
+  max_connections: 10
+  connection_timeout: "30s"
+  idle_timeout: "10m"
+
+# Development debug settings
+debug:
+  enabled: true          # Enable all debug features
+  profiling: true        # Enable profiling
+  trace_requests: true   # Trace all HTTP requests
+  verbose_logging: true  # Extra verbose logging
+
+  # Mock settings for testing
+  mock_mcp_servers: false  # Set to true to test without real MCP servers
+  mock_api_responses: false
+
+  # Development helpers
+  hot_reload: true       # Enable hot reload if supported
+  dev_mode: true
+
+# All features enabled for development testing
+features:
+  experimental_ui: true      # Test experimental features
+  beta_analysis: true
+  advanced_mentor: true
+
+  search_enabled: true
+  analysis_enabled: true
+  mentor_enabled: true
+  trends_enabled: true
+
+  github_integration: true
+  web_scraping: true        # Enable for testing
+  code_execution: true
+
+# Development notifications
+notifications:
+  enabled: true
+
+  types:
+    success: true
+    warning: true
+    error: true
+    info: true
+
+  desktop: true           # Enable desktop notifications for development
+  sound: false
+
+  duration: "5s"          # Longer duration for development
+  auto_dismiss: true
+
+# Development update settings
+updates:
+  check_for_updates: false  # Disable update checks in development
+  auto_update: false
+  update_channel: "alpha"   # Alpha channel for latest features
+  check_interval: "1h"
+
+# Development-specific environment variables
+env:
+  # Override these in your local environment
+  ANTOINE_DEV_MODE: "true"
+  ANTOINE_LOG_LEVEL: "debug"
+  ANTOINE_MOCK_SERVERS: "false"
+  ANTOINE_ENABLE_PROFILING: "true"
+  ANTOINE_DISABLE_ANALYTICS: "true"
+
+# Development testing configuration
+testing:
+  # Test data settings
+  use_test_data: true
+  test_data_path: "./testdata"
+
+  # Mock server settings
+  mock_servers:
+    enabled: false
+    port_range: "9000-9010"
+
+  # Integration test settings
+  integration_tests:
+    enabled: true
+    timeout: "5m"
+    parallel: false       # Sequential for easier debugging
+
+  # Performance test settings
+  performance_tests:
+    enabled: false        # Disabled by default
+    duration: "30s"
+    concurrency: 1
+
+# Local development paths
+paths:
+  config_dir: "./.antoine"
+  cache_dir: "./.antoine/cache"
+  log_dir: "./logs"
+  data_dir: "./data"
+  temp_dir: "./tmp"
+
+# Development server settings (if applicable)
+dev_server:
+  enabled: false
+  host: "localhost"
+  port: 8080
+  auto_reload: true
+  serve_docs: true
+  serve_static: true

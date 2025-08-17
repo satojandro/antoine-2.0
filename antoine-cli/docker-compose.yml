@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  antoine-cli:
+    build: .
+    container_name: antoine-cli
+    volumes:
+      - ./configs:/home/antoine/.config/antoine
+      - antoine-cache:/home/antoine/.cache
+    environment:
+      - ANTOINE_API_BASE_URL=https://api.example.com
+      - ANTOINE_LOG_LEVEL=info
+    networks:
+      - antoine-network
+
+  # MCP Server simulators para desarrollo
+  mcp-exa:
+    image: nginx:alpine
+    container_name: mcp-exa
+    ports:
+      - "8001:80"
+    volumes:
+      - ./scripts/mock-exa.html:/usr/share/nginx/html/index.html
+    networks:
+      - antoine-network
+
+  mcp-github:
+    image: nginx:alpine
+    container_name: mcp-github
+    ports:
+      - "8002:80"
+    volumes:
+      - ./scripts/mock-github.html:/usr/share/nginx/html/index.html
+    networks:
+      - antoine-network
+
+  mcp-deepwiki:
+    image: nginx:alpine
+    container_name: mcp-deepwiki
+    ports:
+      - "8003:80"
+    networks:
+      - antoine-network
+
+volumes:
+  antoine-cache:
+
+networks:
+  antoine-network:
+    driver: bridge

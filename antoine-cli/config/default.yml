@@ -1,0 +1,397 @@
+# Antoine CLI - Default Configuration
+# This file contains the default settings for Antoine CLI
+# All settings can be overridden via environment variables or user config
+
+# Application metadata
+app:
+  name: "antoine-cli"
+  version: "1.0.0"
+  description: "Your Ultimate Hackathon Mentor"
+  author: "Antoine Team"
+
+# API Configuration
+api:
+  base_url: "https://api.antoine.ai"
+  timeout: "30s"
+  retry_count: 3
+  retry_delay: "1s"
+  rate_limit: 100
+  rate_limit_window: "1h"
+  user_agent: "Antoine-CLI/1.0.0"
+
+# MCP (Model Context Protocol) Server Configuration
+mcp:
+  # Connection settings
+  timeout: "30s"
+  retry_count: 3
+  retry_delay: "2s"
+  max_connections: 10
+  keep_alive: true
+
+  # MCP Server endpoints
+  servers:
+    exa:
+      endpoint: "mcp://localhost:8001"
+      description: "Semantic web search and content discovery"
+      enabled: true
+      timeout: "30s"
+      features:
+        - search_hackathons
+        - search_projects
+        - trend_analysis
+
+    github:
+      endpoint: "mcp://localhost:8002"
+      description: "GitHub repository analysis and tools"
+      enabled: true
+      timeout: "45s"
+      features:
+        - repo_analysis
+        - file_reading
+        - commit_history
+        - issue_tracking
+
+    deepwiki:
+      endpoint: "mcp://localhost:8003"
+      description: "Intelligent repository summarization"
+      enabled: true
+      timeout: "60s"
+      features:
+        - repo_overview
+        - documentation_generation
+        - code_explanation
+
+    e2b:
+      endpoint: "mcp://localhost:8004"
+      description: "Code execution in sandboxed environments"
+      enabled: true
+      timeout: "120s"
+      features:
+        - code_execution
+        - data_analysis
+        - custom_scripts
+
+    browserbase:
+      endpoint: "mcp://localhost:8005"
+      description: "Automated web browsing and data extraction"
+      enabled: false  # Disabled by default
+      timeout: "90s"
+      features:
+        - web_automation
+        - screenshot_capture
+        - form_interaction
+
+    firecrawl:
+      endpoint: "mcp://localhost:8006"
+      description: "Structured content extraction from web pages"
+      enabled: false  # Disabled by default
+      timeout: "60s"
+      features:
+        - content_extraction
+        - structured_scraping
+        - markdown_conversion
+
+# User Interface Configuration
+ui:
+  # Theme settings
+  theme: "dark"  # Options: dark, light, minimal
+
+  # Visual preferences
+  animations: true
+  ascii_art: true
+  colors: true
+  unicode_support: true
+
+  # Layout settings
+  max_width: 120
+  max_height: 30
+  sidebar_width: 25
+
+  # Interactive elements
+  show_help_hints: true
+  show_key_bindings: true
+  confirm_destructive_actions: true
+
+  # Table display settings
+  table:
+    max_rows: 20
+    show_borders: true
+    zebra_striping: true
+    sortable: true
+
+  # Progress indicators
+  progress:
+    show_percentage: true
+    show_eta: true
+    animation_speed: "100ms"
+
+# Cache Configuration
+cache:
+  # Cache enablement
+  enabled: true
+
+  # Storage settings
+  type: "memory"  # Options: memory, disk, hybrid
+  max_size_mb: 100
+
+  # TTL (Time To Live) settings by content type
+  ttl:
+    hackathons: "30m"
+    projects: "1h"
+    repositories: "2h"
+    trends: "6h"
+    analysis: "24h"
+    search_results: "15m"
+
+  # Cleanup settings
+  cleanup_interval: "1h"
+  max_entries: 1000
+
+  # Disk cache settings (when type is disk or hybrid)
+  disk:
+    path: "~/.antoine/cache"
+    compression: true
+
+# Logging Configuration
+logging:
+  # Log level: trace, debug, info, warn, error, fatal, panic
+  level: "info"
+
+  # Output settings
+  format: "text"  # Options: text, json
+  output: "stderr"  # Options: stdout, stderr, file
+
+  # File logging (when output is file)
+  file:
+    path: "~/.antoine/logs/antoine.log"
+    max_size_mb: 10
+    max_backups: 5
+    max_age_days: 30
+    compress: true
+
+  # Development settings
+  development: false
+  caller: false
+  stack_trace: false
+
+# Analytics and Telemetry
+analytics:
+  enabled: true
+  anonymous: true
+  endpoint: "https://analytics.antoine.ai"
+
+  # Data collection preferences
+  collect:
+    usage_stats: true
+    performance_metrics: true
+    error_reports: true
+    feature_usage: true
+
+  # Privacy settings
+  anonymize_paths: true
+  anonymize_repos: true
+  hash_user_data: true
+
+  # Reporting intervals
+  batch_size: 100
+  flush_interval: "5m"
+
+# Search Configuration
+search:
+  # Default search parameters
+  default_limit: 20
+  max_limit: 100
+
+  # Hackathon search defaults
+  hackathons:
+    sort_by: "start_date"  # Options: start_date, prize_pool, popularity
+    sort_order: "desc"     # Options: asc, desc
+    include_past: false
+    include_virtual: true
+    min_prize: 0
+
+  # Project search defaults
+  projects:
+    sort_by: "popularity"  # Options: popularity, recent, stars
+    sort_order: "desc"
+    include_forks: false
+    min_stars: 0
+
+  # Filters
+  filters:
+    technologies: []
+    categories: []
+    locations: []
+    date_range: ""
+
+# Analysis Configuration
+analysis:
+  # Repository analysis settings
+  repository:
+    max_file_size_mb: 10
+    max_files: 1000
+    include_dependencies: true
+    include_security: true
+    include_performance: true
+
+    # File type analysis
+    analyze_code: true
+    analyze_docs: true
+    analyze_config: true
+
+    # Depth settings
+    shallow_clone: true
+    max_commit_history: 100
+
+  # Trend analysis settings
+  trends:
+    default_timeframe: "6months"  # Options: 1month, 3months, 6months, 1year
+    min_data_points: 10
+    confidence_threshold: 0.8
+
+  # Performance settings
+  parallel_analysis: true
+  max_concurrent_jobs: 4
+  timeout: "10m"
+
+# Mentor Configuration
+mentor:
+  # AI model settings
+  model: "gpt-4"
+  max_tokens: 2048
+  temperature: 0.7
+
+  # Conversation settings
+  max_history: 50
+  context_window: 10
+  save_conversations: true
+
+  # Personality settings
+  personality: "helpful"  # Options: helpful, casual, professional, technical
+  expertise_level: "intermediate"  # Options: beginner, intermediate, advanced
+
+  # Response preferences
+  code_examples: true
+  step_by_step: true
+  provide_resources: true
+
+  # Session settings
+  session_timeout: "30m"
+  auto_save: true
+
+# Security Configuration
+security:
+  # Credential management
+  credentials:
+    storage: "keyring"  # Options: keyring, file, env
+    encryption: true
+    auto_refresh: true
+
+  # API security
+  api:
+    verify_ssl: true
+    timeout: "30s"
+    max_redirects: 3
+
+  # Data protection
+  data:
+    anonymize_logs: true
+    encrypt_cache: false
+    secure_delete: true
+
+# Performance Configuration
+performance:
+  # Concurrency settings
+  max_goroutines: 10
+  worker_pool_size: 5
+
+  # Memory management
+  max_memory_mb: 512
+  gc_percentage: 100
+
+  # Network settings
+  max_connections: 20
+  connection_timeout: "10s"
+  idle_timeout: "5m"
+
+# Development and Debug Configuration
+debug:
+  enabled: false
+  profiling: false
+  trace_requests: false
+  verbose_logging: false
+
+  # Mock settings for testing
+  mock_mcp_servers: false
+  mock_api_responses: false
+
+  # Development helpers
+  hot_reload: false
+  dev_mode: false
+
+# Feature Flags
+features:
+  # Experimental features
+  experimental_ui: false
+  beta_analysis: false
+  advanced_mentor: false
+
+  # Feature availability
+  search_enabled: true
+  analysis_enabled: true
+  mentor_enabled: true
+  trends_enabled: true
+
+  # Integration features
+  github_integration: true
+  web_scraping: false
+  code_execution: true
+
+# Notification Configuration
+notifications:
+  enabled: true
+
+  # Notification types
+  types:
+    success: true
+    warning: true
+    error: true
+    info: true
+
+  # Delivery methods
+  desktop: false
+  sound: false
+
+  # Timing
+  duration: "3s"
+  auto_dismiss: true
+
+# Update Configuration
+updates:
+  check_for_updates: true
+  auto_update: false
+  update_channel: "stable"  # Options: stable, beta, alpha
+  check_interval: "24h"
+
+  # Update sources
+  github_releases: true
+  custom_endpoint: ""
+
+# Backup and Sync Configuration
+backup:
+  enabled: false
+
+  # Backup targets
+  config: true
+  cache: false
+  logs: false
+  conversations: true
+
+  # Backup settings
+  interval: "daily"
+  retention: "30d"
+  compression: true
+
+  # Sync settings
+  sync_enabled: false
+  sync_endpoint: ""
