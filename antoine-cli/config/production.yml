@@ -1,0 +1,464 @@
+# Antoine CLI - Production Configuration
+# This configuration extends the default settings for production environment
+# It prioritizes stability, security, and performance over development convenience
+
+# Inherit from default configuration
+extends: "default.yaml"
+
+# Production app settings
+app:
+  name: "antoine-cli"
+  version: "1.0.0"
+  description: "Your Ultimate Hackathon Mentor"
+  environment: "production"
+
+# Production API settings
+api:
+  base_url: "https://api.antoine.ai"
+  timeout: "30s"
+  retry_count: 3
+  retry_delay: "2s"
+  rate_limit: 100
+  rate_limit_window: "1h"
+  user_agent: "Antoine-CLI/1.0.0"
+
+# Production MCP configuration
+mcp:
+  timeout: "30s"
+  retry_count: 3
+  retry_delay: "2s"
+  max_connections: 5  # Conservative connection limit
+  keep_alive: true
+
+  servers:
+    exa:
+      endpoint: "mcp://exa.antoine.ai:443"
+      enabled: true
+      timeout: "30s"
+      ssl: true
+
+    github:
+      endpoint: "mcp://github.antoine.ai:443"
+      enabled: true
+      timeout: "45s"
+      ssl: true
+
+    deepwiki:
+      endpoint: "mcp://deepwiki.antoine.ai:443"
+      enabled: true
+      timeout: "60s"
+      ssl: true
+
+    e2b:
+      endpoint: "mcp://e2b.antoine.ai:443"
+      enabled: true
+      timeout: "120s"
+      ssl: true
+
+    browserbase:
+      endpoint: "mcp://browserbase.antoine.ai:443"
+      enabled: false  # Disabled by default in production
+      timeout: "90s"
+      ssl: true
+
+    firecrawl:
+      endpoint: "mcp://firecrawl.antoine.ai:443"
+      enabled: false  # Disabled by default in production
+      timeout: "60s"
+      ssl: true
+
+# Production UI settings
+ui:
+  theme: "dark"
+  animations: true
+  ascii_art: true
+  colors: true
+  unicode_support: true
+
+  # Conservative layout settings
+  max_width: 120
+  max_height: 30
+  sidebar_width: 25
+
+  # User-friendly settings
+  show_help_hints: true
+  show_key_bindings: true
+  confirm_destructive_actions: true  # Always confirm in production
+
+  table:
+    max_rows: 20
+    show_borders: true
+    zebra_striping: true
+    sortable: true
+
+  progress:
+    show_percentage: true
+    show_eta: true
+    animation_speed: "100ms"
+
+# Production cache settings
+cache:
+  enabled: true
+  type: "hybrid"  # Use both memory and disk for production
+  max_size_mb: 50  # Conservative memory usage
+
+  # Optimized TTL for production
+  ttl:
+    hackathons: "30m"
+    projects: "1h"
+    repositories: "2h"
+    trends: "6h"
+    analysis: "24h"
+    search_results: "15m"
+
+  cleanup_interval: "1h"
+  max_entries: 1000
+
+  # Disk cache for persistence
+  disk:
+    path: "~/.antoine/cache"
+    compression: true
+
+# Production logging
+logging:
+  level: "info"  # Standard info level for production
+  format: "json"  # Structured logging for production
+  output: "file"  # Log to file in production
+
+  file:
+    path: "~/.antoine/logs/antoine.log"
+    max_size_mb: 10
+    max_backups: 5
+    max_age_days: 30
+    compress: true
+
+  # Disable development features
+  development: false
+  caller: false
+  stack_trace: false
+
+# Production analytics
+analytics:
+  enabled: true
+  anonymous: true
+  endpoint: "https://analytics.antoine.ai"
+
+  # Conservative data collection
+  collect:
+    usage_stats: true
+    performance_metrics: true
+    error_reports: true
+    feature_usage: true
+
+  # Strong privacy settings
+  anonymize_paths: true
+  anonymize_repos: true
+  hash_user_data: true
+
+  # Efficient batching
+  batch_size: 100
+  flush_interval: "5m"
+
+# Production search settings
+search:
+  default_limit: 20
+  max_limit: 100
+
+  hackathons:
+    sort_by: "start_date"
+    sort_order: "desc"
+    include_past: false
+    include_virtual: true
+    min_prize: 0
+
+  projects:
+    sort_by: "popularity"
+    sort_order: "desc"
+    include_forks: false
+    min_stars: 0
+
+# Production analysis settings
+analysis:
+  repository:
+    max_file_size_mb: 10   # Conservative file size limit
+    max_files: 1000        # Conservative file count
+    include_dependencies: true
+    include_security: true
+    include_performance: true
+
+    analyze_code: true
+    analyze_docs: true
+    analyze_config: true
+
+    shallow_clone: true    # Efficient shallow clones
+    max_commit_history: 100
+
+  trends:
+    default_timeframe: "6months"
+    min_data_points: 10
+    confidence_threshold: 0.8
+
+  # Conservative concurrency
+  parallel_analysis: true
+  max_concurrent_jobs: 2
+  timeout: "10m"
+
+# Production mentor settings
+mentor:
+  model: "gpt-4"
+  max_tokens: 2048
+  temperature: 0.7
+
+  max_history: 50
+  context_window: 10
+  save_conversations: true
+
+  personality: "helpful"
+  expertise_level: "intermediate"
+
+  code_examples: true
+  step_by_step: true
+  provide_resources: true
+
+  session_timeout: "30m"
+  auto_save: true
+
+# Production security settings
+security:
+  credentials:
+    storage: "keyring"     # Secure keyring storage
+    encryption: true       # Enable encryption
+    auto_refresh: true
+
+  api:
+    verify_ssl: true       # Always verify SSL in production
+    timeout: "30s"
+    max_redirects: 3
+
+  data:
+    anonymize_logs: true   # Anonymize sensitive data
+    encrypt_cache: true    # Encrypt cache data
+    secure_delete: true    # Secure deletion of sensitive data
+
+# Production performance settings
+performance:
+  max_goroutines: 10
+  worker_pool_size: 5
+
+  # Conservative memory settings
+  max_memory_mb: 256
+  gc_percentage: 100
+
+  # Network settings
+  max_connections: 20
+  connection_timeout: "10s"
+  idle_timeout: "5m"
+
+# Production debug settings (disabled)
+debug:
+  enabled: false
+  profiling: false
+  trace_requests: false
+  verbose_logging: false
+
+  # No mocking in production
+  mock_mcp_servers: false
+  mock_api_responses: false
+
+  # No development helpers
+  hot_reload: false
+  dev_mode: false
+
+# Production feature flags
+features:
+  # Stable features only
+  experimental_ui: false
+  beta_analysis: false
+  advanced_mentor: false
+
+  # Core features enabled
+  search_enabled: true
+  analysis_enabled: true
+  mentor_enabled: true
+  trends_enabled: true
+
+  # Conservative integration settings
+  github_integration: true
+  web_scraping: false    # Disabled for stability
+  code_execution: true
+
+# Production notifications
+notifications:
+  enabled: true
+
+  types:
+    success: true
+    warning: true
+    error: true
+    info: true
+
+  # Conservative notification settings
+  desktop: false
+  sound: false
+
+  duration: "3s"
+  auto_dismiss: true
+
+# Production update settings
+updates:
+  check_for_updates: true
+  auto_update: false     # Manual updates in production
+  update_channel: "stable"
+  check_interval: "24h"
+
+  github_releases: true
+  custom_endpoint: "https://releases.antoine.ai"
+
+# Production backup settings
+backup:
+  enabled: true
+
+  # Backup important data
+  config: true
+  cache: false           # Don't backup cache
+  logs: false           # Don't backup logs
+  conversations: true    # Backup user conversations
+
+  # Conservative backup settings
+  interval: "daily"
+  retention: "30d"
+  compression: true
+
+  # Sync disabled by default
+  sync_enabled: false
+
+# Production monitoring
+monitoring:
+  enabled: true
+
+  # Health checks
+  health_check:
+    enabled: true
+    interval: "5m"
+    timeout: "30s"
+    endpoints:
+      - "https://api.antoine.ai/health"
+
+  # Metrics collection
+  metrics:
+    enabled: true
+    endpoint: "https://metrics.antoine.ai"
+    interval: "1m"
+
+    # Collected metrics
+    collect:
+      performance: true
+      errors: true
+      usage: true
+      system: true
+
+  # Alerting
+  alerts:
+    enabled: true
+    error_threshold: 10    # Alert after 10 errors
+    latency_threshold: "5s"
+    memory_threshold: 80   # Alert at 80% memory usage
+
+# Production rate limiting
+rate_limiting:
+  enabled: true
+
+  # Global limits
+  global:
+    requests_per_minute: 60
+    burst: 10
+
+  # Per-command limits
+  commands:
+    search: 30
+    analyze: 10
+    mentor: 20
+    trends: 15
+
+  # MCP server limits
+  mcp:
+    requests_per_minute: 100
+    burst: 20
+
+# Production error handling
+error_handling:
+  # Retry policies
+  retry:
+    max_attempts: 3
+    backoff: "exponential"
+    base_delay: "1s"
+    max_delay: "30s"
+
+  # Error reporting
+  reporting:
+    enabled: true
+    endpoint: "https://errors.antoine.ai"
+    include_stack_trace: false
+    anonymize_data: true
+
+  # Graceful degradation
+  graceful_degradation:
+    enabled: true
+    fallback_mode: "offline"
+    cache_fallback: true
+
+# Production compliance
+compliance:
+  # Data protection
+  gdpr:
+    enabled: true
+    data_retention: "2y"
+    allow_data_export: true
+    allow_data_deletion: true
+
+  # Security standards
+  security:
+    encryption_at_rest: true
+    encryption_in_transit: true
+    audit_logging: true
+    access_controls: true
+
+  # Terms and privacy
+  legal:
+    terms_acceptance_required: true
+    privacy_policy_version: "1.0"
+    cookie_consent: false  # CLI doesn't use cookies
+
+# Production resource limits
+limits:
+  # CPU limits
+  cpu:
+    max_usage_percent: 80
+    throttle_threshold: 90
+
+  # Memory limits
+  memory:
+    max_usage_mb: 512
+    warning_threshold_mb: 400
+    oom_threshold_mb: 480
+
+  # Disk limits
+  disk:
+    max_cache_size_mb: 100
+    max_log_size_mb: 50
+    min_free_space_mb: 100
+
+  # Network limits
+  network:
+    max_bandwidth_mbps: 10
+    connection_timeout: "30s"
+    read_timeout: "60s"
+    write_timeout: "30s"
+
+# Production environment variables
+env:
+  ANTOINE_ENV: "production"
+  ANTOINE_LOG_LEVEL: "info"
+  ANTOINE_ANALYTICS_ENABLED: "true"
+  ANTOINE_DEBUG_ENABLED: "false"
+  ANTOINE_CACHE_ENABLED: "true"
