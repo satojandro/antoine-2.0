@@ -70,91 +70,88 @@ var (
 var (
 	// Main container for the entire application
 	AppContainerStyle = lipgloss.NewStyle().
-		Width(100).
-		Height(30).
-		Background(DarkBlue).
-		Foreground(White)
+				Width(100).
+				Height(30).
+				Background(DarkBlue).
+				Foreground(White)
 
 	// Primary content container with border
 	ContentContainerStyle = lipgloss.NewStyle().
-		Border(BorderPrimaryStyle).
-		BorderForeground(Gold).
-		Background(DarkBlue).
-		Foreground(White).
-		Padding(1, 2).
-		Margin(1)
+				Border(BorderPrimaryStyle).
+				BorderForeground(Gold).
+				Background(DarkBlue).
+				Foreground(White).
+				Padding(1, 2).
+				Margin(1)
 
 	// Secondary container for nested content
 	SecondaryContainerStyle = lipgloss.NewStyle().
-		Border(BorderSubtleStyle).
-		BorderForeground(Gray).
-		Background(Navy).
-		Foreground(White).
-		Padding(1).
-		Margin(0, 1)
+				Border(BorderSubtleStyle).
+				BorderForeground(Gray).
+				Background(Navy).
+				Foreground(White).
+				Padding(1).
+				Margin(0, 1)
 
 	// Card-like container for grouped content
 	CardStyle = lipgloss.NewStyle().
-		Border(BorderPrimaryStyle).
-		BorderForeground(Gold).
-		Background(SoftBG).
-		Foreground(White).
-		Padding(1, 2).
-		Margin(1, 0)
+			Border(BorderPrimaryStyle).
+			BorderForeground(Gold).
+			Background(SoftBG).
+			Foreground(White).
+			Padding(1, 2).
+			Margin(1, 0)
 
 	// Modal container for dialogs and popups
 	ModalStyle = lipgloss.NewStyle().
-		Border(BorderDoubleStyle).
-		BorderForeground(Cyan).
-		Background(Navy).
-		Foreground(White).
-		Padding(2, 4).
-		Align(AlignCenter)
+			Border(BorderDoubleStyle).
+			BorderForeground(Cyan).
+			Background(Navy).
+			Foreground(White).
+			Padding(2, 4).
+			Align(AlignCenter)
 
 	// Header container for titles and navigation
 	HeaderStyle = lipgloss.NewStyle().
-		Border(BorderPrimaryStyle, false, false, true, false).
-		BorderForeground(Gold).
-		Background(DarkBlue).
-		Foreground(Gold).
-		Bold(true).
-		Padding(1, 2).
-		Width(100)
+			Border(BorderPrimaryStyle, false, false, true, false).
+			BorderForeground(Gold).
+			Background(DarkBlue).
+			Foreground(Gold).
+			Bold(true).
+			Padding(1, 2).
+			Width(100)
 
 	// Footer container for status and help
 	FooterStyle = lipgloss.NewStyle().
-		Border(BorderPrimaryStyle, true, false, false, false).
-		BorderForeground(Gold).
-		Background(Navy).
-		Foreground(Gray).
-		Padding(1, 2).
-		Width(100)
+			Border(BorderPrimaryStyle, true, false, false, false).
+			BorderForeground(Gold).
+			Background(Navy).
+			Foreground(Gray).
+			Padding(1, 2).
+			Width(100)
 
 	// Sidebar container for navigation
 	SidebarStyle = lipgloss.NewStyle().
-		Border(BorderSubtleStyle, false, true, false, false).
-		BorderForeground(Gray).
-		Background(Navy).
-		Foreground(White).
-		Padding(1).
-		Width(20).
-		Height(25)
+			Border(BorderSubtleStyle, false, true, false, false).
+			BorderForeground(Gray).
+			Background(Navy).
+			Foreground(White).
+			Padding(1).
+			Width(20).
+			Height(25)
 )
 
 // Flex layout utilities
 var (
-	// Horizontal flex container
-	FlexRowStyle = lipgloss.NewStyle().
-		Display(lipgloss.Block)
+	// Horizontal flex container (solo comentario, lipgloss maneja esto automáticamente)
+	FlexRowStyle = lipgloss.NewStyle()
 
 	// Vertical flex container
-	FlexColumnStyle = lipgloss.NewStyle().
-		Display(lipgloss.Block)
+	FlexColumnStyle = lipgloss.NewStyle()
 
 	// Centered flex container
 	FlexCenterStyle = lipgloss.NewStyle().
-		Display(lipgloss.Block).
-		Align(AlignCenter)
+			Align(lipgloss.Center) // ✅ Forma correcta
 )
 
 // Spacing utilities
@@ -277,7 +274,7 @@ func CreateThreeColumnLayout(leftContent, centerContent, rightContent string, to
 
 // Layout composition helpers
 
-// CreatePage creates a full page layout with header, content, and footer
+// Corregir esta función:
 func CreatePage(header, content, footer string, width, height int) string {
 	headerHeight := 3
 	footerHeight := 3
@@ -289,7 +286,7 @@ func CreatePage(header, content, footer string, width, height int) string {
 		Render(header)
 
 	contentStyled := ContentContainerStyle.Copy().
-		Width(width - 4). // Account for container padding/borders
+		Width(width - 4).
 		Height(contentHeight).
 		Render(content)
 
@@ -354,7 +351,7 @@ func GetResponsiveWidth(terminalWidth int) int {
 func CenterContent(content string, width int) string {
 	return lipgloss.NewStyle().
 		Width(width).
-		Align(AlignCenter).
+		Align(lipgloss.Center). // ✅ Forma correcta
 		Render(content)
 }
 

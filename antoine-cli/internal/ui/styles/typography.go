@@ -7,10 +7,10 @@ import (
 )
 
 // Font weights and styles
-const (
-	FontWeightNormal = lipgloss.Normal
-	FontWeightBold   = lipgloss.Bold
-)
+//const (
+//	FontWeightNormal = lipgloss.Normal
+//	FontWeightBold   = lipgloss.Bold
+//)
 
 // Text alignment options
 const (
@@ -44,138 +44,138 @@ var (
 
 	// Body text styles
 	BodyStyle = lipgloss.NewStyle().
-		Foreground(White).
-		MarginBottom(1)
+			Foreground(White).
+			MarginBottom(1)
 
 	BodySecondaryStyle = lipgloss.NewStyle().
-		Foreground(Gray)
+				Foreground(Gray)
 
 	BodyMutedStyle = lipgloss.NewStyle().
-		Foreground(DarkGray)
+			Foreground(DarkGray)
 
 	// Interactive text styles
 	LinkStyle = lipgloss.NewStyle().
-		Foreground(Blue).
-		Underline(true)
+			Foreground(Blue).
+			Underline(true)
 
 	LinkHoverStyle = lipgloss.NewStyle().
-		Foreground(Cyan).
-		Underline(true).
-		Bold(true)
+			Foreground(Cyan).
+			Underline(true).
+			Bold(true)
 
 	ButtonStyle = lipgloss.NewStyle().
-		Foreground(DarkBlue).
-		Background(Gold).
-		Bold(true).
-		Padding(0, 2).
-		MarginRight(1)
+			Foreground(DarkBlue).
+			Background(Gold).
+			Bold(true).
+			Padding(0, 2).
+			MarginRight(1)
 
 	ButtonHoverStyle = lipgloss.NewStyle().
-		Foreground(DarkBlue).
-		Background(Cyan).
-		Bold(true).
-		Padding(0, 2).
-		MarginRight(1)
+				Foreground(DarkBlue).
+				Background(Cyan).
+				Bold(true).
+				Padding(0, 2).
+				MarginRight(1)
 
 	ButtonDisabledStyle = lipgloss.NewStyle().
-		Foreground(DarkGray).
-		Background(Navy).
-		Padding(0, 2).
-		MarginRight(1)
+				Foreground(DarkGray).
+				Background(Navy).
+				Padding(0, 2).
+				MarginRight(1)
 
 	// Code and technical text styles
 	CodeStyle = lipgloss.NewStyle().
-		Foreground(Green).
-		Background(Navy).
-		Padding(0, 1)
+			Foreground(Green).
+			Background(Navy).
+			Padding(0, 1)
 
 	CodeBlockStyle = lipgloss.NewStyle().
-		Foreground(Green).
-		Background(Navy).
-		Padding(1, 2).
-		MarginTop(1).
-		MarginBottom(1)
+			Foreground(Green).
+			Background(Navy).
+			Padding(1, 2).
+			MarginTop(1).
+			MarginBottom(1)
 
 	// Status and semantic text styles
 	SuccessStyle = lipgloss.NewStyle().
-		Foreground(Green).
-		Bold(true)
+			Foreground(Green).
+			Bold(true)
 
 	WarningStyle = lipgloss.NewStyle().
-		Foreground(Orange).
-		Bold(true)
+			Foreground(Orange).
+			Bold(true)
 
 	ErrorStyle = lipgloss.NewStyle().
-		Foreground(Red).
-		Bold(true)
+			Foreground(Red).
+			Bold(true)
 
 	InfoStyle = lipgloss.NewStyle().
-		Foreground(Yellow).
-		Bold(true)
+			Foreground(Yellow).
+			Bold(true)
 
 	// Special purpose text styles
 	BrandStyle = lipgloss.NewStyle().
-		Foreground(Gold).
-		Bold(true)
+			Foreground(Gold).
+			Bold(true)
 
 	AccentStyle = lipgloss.NewStyle().
-		Foreground(Cyan).
-		Bold(true)
+			Foreground(Cyan).
+			Bold(true)
 
 	HighlightStyle = lipgloss.NewStyle().
-		Foreground(DarkBlue).
-		Background(Gold).
-		Bold(true)
+			Foreground(DarkBlue).
+			Background(Gold).
+			Bold(true)
 
 	// Label and form styles
 	LabelStyle = lipgloss.NewStyle().
-		Foreground(Gray).
-		Bold(true)
+			Foreground(Gray).
+			Bold(true)
 
 	InputStyle = lipgloss.NewStyle().
-		Foreground(White).
-		Background(Navy).
-		Padding(0, 1)
+			Foreground(White).
+			Background(Navy).
+			Padding(0, 1)
 
 	InputFocusStyle = lipgloss.NewStyle().
-		Foreground(White).
-		Background(Navy).
-		Border(lipgloss.NormalBorder()).
-		BorderForeground(Gold).
-		Padding(0, 1)
+			Foreground(White).
+			Background(Navy).
+			Border(lipgloss.NormalBorder()).
+			BorderForeground(Gold).
+			Padding(0, 1)
 
 	// Table styles
 	TableHeaderStyle = lipgloss.NewStyle().
-		Foreground(Gold).
-		Background(Navy).
-		Bold(true).
-		Padding(0, 1).
-		Align(AlignCenter)
+				Foreground(Gold).
+				Background(Navy).
+				Bold(true).
+				Padding(0, 1).
+				Align(AlignCenter)
 
 	TableCellStyle = lipgloss.NewStyle().
-		Foreground(White).
-		Padding(0, 1)
+			Foreground(White).
+			Padding(0, 1)
 
 	TableSelectedStyle = lipgloss.NewStyle().
-		Foreground(DarkBlue).
-		Background(Gold).
-		Bold(true).
-		Padding(0, 1)
+				Foreground(DarkBlue).
+				Background(Gold).
+				Bold(true).
+				Padding(0, 1)
 
 	// List and menu styles
 	ListItemStyle = lipgloss.NewStyle().
-		Foreground(White).
-		MarginRight(2)
+			Foreground(White).
+			MarginRight(2)
 
 	ListSelectedStyle = lipgloss.NewStyle().
-		Foreground(DarkBlue).
-		Background(Gold).
-		Bold(true).
-		MarginRight(2)
+				Foreground(DarkBlue).
+				Background(Gold).
+				Bold(true).
+				MarginRight(2)
 
 	ListBulletStyle = lipgloss.NewStyle().
-		Foreground(Gold).
-		Bold(true)
+			Foreground(Gold).
+			Bold(true)
 )
 
 // Typography helper functions
