@@ -16,6 +16,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/zalando/go-keyring"
 )
 
 // Credential types for different services
@@ -338,7 +340,8 @@ func (fs *FileStorage) Retrieve(key string) (Credential, error) {
 func (fs *FileStorage) Delete(key string) error {
 	filePath := filepath.Join(fs.basePath, fs.getFileName(key))
 
-	err := os.Remove(filePath)
+	err := os.RemoveAll(filePath)
+	//err := os.Remove(filePath)
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("failed to delete credential file: %w", err)
 	}
@@ -380,7 +383,7 @@ func (fs *FileStorage) Clear() error {
 	for _, entry := range entries {
 		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".cred") {
 			filePath := filepath.Join(fs.basePath, entry.Name())
-			err := os.Remove(filePath)
+			err := os.RemoveAll(filePath)
 			if err != nil {
 				return fmt.Errorf("failed to remove credential file %s: %w", entry.Name(), err)
 			}

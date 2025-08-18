@@ -84,9 +84,9 @@ func (h *Header) renderFullHeader() string {
 	var sections []string
 
 	// ASCII Art Logo
-	logo := ascii.GetLogo(ascii.LogoSizeLarge)
+	logo := ascii.GetLogo(80)
 	if h.config.Animated {
-		logo = ascii.GetAnimatedLogo(ascii.LogoSizeLarge, time.Now())
+		logo = ascii.GetAnimatedLogo(80, time.Now())
 	}
 
 	styledLogo := styles.BrandStyle.Render(logo)
@@ -140,9 +140,9 @@ func (h *Header) renderCompactHeader() string {
 	var sections []string
 
 	// Compact ASCII logo
-	logo := ascii.GetLogo(ascii.LogoSizeSmall)
+	logo := ascii.GetLogo(40)
 	if h.config.Animated {
-		logo = ascii.GetAnimatedLogo(ascii.LogoSizeSmall, time.Now())
+		logo = ascii.GetAnimatedLogo(40, time.Now())
 	}
 
 	// Horizontal layout: logo + title + info
@@ -226,10 +226,10 @@ func (h *Header) renderBannerHeader() string {
 	sections = append(sections, topBorder)
 
 	// Main banner content
-	var bannerContent []string
+	//var bannerContent []string
 
 	// Left side: Logo or brand
-	leftContent := ascii.GetLogo(ascii.LogoSizeSmall)
+	leftContent := ascii.GetLogo(40)
 	if leftContent == "" {
 		leftContent = styles.BrandStyle.Render("🤖 ANTOINE")
 	} else {

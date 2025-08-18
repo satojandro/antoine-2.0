@@ -63,8 +63,49 @@ type TerminalDetector struct {
 // NewTerminalDetector creates a new terminal detector
 func NewTerminalDetector() *TerminalDetector {
 	return &TerminalDetector{
+		info:     nil, // Se inicializará en DetectCapabilities
 		features: make(map[Feature]bool),
 		cached:   false,
+	}
+}
+
+// SafeDetectTerminal es una versión más segura que maneja errores
+func SafeDetectTerminal() *TerminalInfo {
+	defer func() {
+		if r := recover(); r != nil {
+			// Log el error si tienes logging disponible
+			fmt.Fprintf(os.Stderr, "Warning: Terminal detection failed: %v\n", r)
+		}
+	}()
+
+	detector := NewTerminalDetector()
+	if detector == nil {
+		return getDefaultTerminalInfo()
+	}
+
+	info := detector.DetectCapabilities()
+	if info == nil {
+		return getDefaultTerminalInfo()
+	}
+
+	return info
+}
+
+// getDefaultTerminalInfo retorna valores por defecto seguros
+func getDefaultTerminalInfo() *TerminalInfo {
+	return &TerminalInfo{
+		IsTTY:             false,
+		SupportsColor:     false,
+		Supports256:       false,
+		SupportsTrueColor: false,
+		SupportsUnicode:   false,
+		Width:             80,
+		Height:            24,
+		Type:              "dumb",
+		Program:           "unknown",
+		Version:           "",
+		Platform:          runtime.GOOS,
+		Shell:             "unknown",
 	}
 }
 
@@ -72,6 +113,11 @@ func NewTerminalDetector() *TerminalDetector {
 func (td *TerminalDetector) DetectCapabilities() *TerminalInfo {
 	if td.cached && td.info != nil {
 		return td.info
+	}
+
+	// Asegurar que td.features esté inicializado
+	if td.features == nil {
+		td.features = make(map[Feature]bool)
 	}
 
 	info := &TerminalInfo{
@@ -99,10 +145,12 @@ func (td *TerminalDetector) DetectCapabilities() *TerminalInfo {
 	// Detect Unicode support
 	info.SupportsUnicode = td.detectUnicodeSupport()
 
-	// Detect features
+	// CRÍTICO: Asignar info a td.info ANTES de llamar detectFeatures()
+	td.info = info
+
+	// Detect features (ahora td.info está inicializado)
 	td.detectFeatures()
 
-	td.info = info
 	td.cached = true
 
 	return info
@@ -110,11 +158,13 @@ func (td *TerminalDetector) DetectCapabilities() *TerminalInfo {
 
 // isTTY checks if the output is connected to a terminal
 func (td *TerminalDetector) isTTY() bool {
-	// Check stdout
-	if fileInfo, err := os.Stdout.Stat(); err == nil {
-		return (fileInfo.Mode() & os.ModeCharDevice) != 0
+	// Verificación básica usando variables de entorno
+	if os.Getenv("TERM") == "" || os.Getenv("TERM") == "dumb" {
+		return false
 	}
-	return false
+
+	// En la mayoría de los casos, si TERM está configurado, estamos en un terminal
+	return true
 }
 
 // getTerminalSize returns the terminal dimensions
@@ -149,6 +199,10 @@ func (td *TerminalDetector) getTerminalSize() (width, height int) {
 
 // getUnixTerminalSize gets terminal size on Unix-like systems
 func (td *TerminalDetector) getUnixTerminalSize() (width, height int) {
+	if runtime.GOOS == "windows" {
+		return 0, 0
+	}
+
 	type winsize struct {
 		Row    uint16
 		Col    uint16
@@ -157,19 +211,23 @@ func (td *TerminalDetector) getUnixTerminalSize() (width, height int) {
 	}
 
 	ws := &winsize{}
-	retCode, _, errno := syscall.Syscall(syscall.SYS_IOCTL,
-		uintptr(syscall.Stdin),
+
+	// Usar 0 como file descriptor para stdin
+	retCode, _, errno := syscall.Syscall(
+		syscall.SYS_IOCTL,
+		uintptr(0),      // stdin
 		uintptr(0x5413), // TIOCGWINSZ
 		uintptr(unsafe.Pointer(ws)))
 
-	if int(retCode) == -1 {
-		// If ioctl fails, try stderr and stdout
-		for _, fd := range []uintptr{uintptr(syscall.Stderr), uintptr(syscall.Stdout)} {
-			retCode, _, errno = syscall.Syscall(syscall.SYS_IOCTL,
+	if int(retCode) == -1 || errno != 0 {
+		// Intentar con stdout y stderr
+		for _, fd := range []uintptr{1, 2} { // 1=stdout, 2=stderr
+			retCode, _, errno = syscall.Syscall(
+				syscall.SYS_IOCTL,
 				fd,
 				uintptr(0x5413),
 				uintptr(unsafe.Pointer(ws)))
-			if int(retCode) != -1 {
+			if int(retCode) != -1 && errno == 0 {
 				break
 			}
 		}
@@ -424,8 +482,18 @@ func detectShell() string {
 
 // detectFeatures detects specific terminal features
 func (td *TerminalDetector) detectFeatures() {
+	// CRÍTICO: Verificar que td.info no sea nil
+	if td.info == nil {
+		return
+	}
+
 	term := strings.ToLower(os.Getenv("TERM"))
-	program := strings.ToLower(td.info.Program)
+
+	// Verificar que Program no sea nil/vacío antes de usarlo
+	program := ""
+	if td.info.Program != "" {
+		program = strings.ToLower(td.info.Program)
+	}
 
 	// Color support (already detected)
 	td.features[FeatureColor] = td.info.SupportsColor

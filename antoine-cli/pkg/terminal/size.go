@@ -376,7 +376,7 @@ type LayoutInfo struct {
 
 // CalculateLayout calculates optimal layout for given constraints
 func (sm *SizeManager) CalculateLayout(minItemWidth, minItemHeight int, gapSize int) LayoutInfo {
-	termWidth, termHeight := sm.GetSize()
+	//termWidth, termHeight := sm.GetSize()
 	contentWidth := sm.GetOptimalWidth()
 	contentHeight := sm.GetOptimalHeight()
 
@@ -434,8 +434,8 @@ func (sm *SizeManager) CalculateLayout(minItemWidth, minItemHeight int, gapSize 
 }
 
 // ResponsiveValue returns different values based on breakpoint
-func (sm *SizeManager) ResponsiveValue(xs, sm, md, lg, xl interface{}) interface{} {
-	switch sm.GetBreakpoint() {
+func (SizeMan *SizeManager) ResponsiveValue(xs, sm, md, lg, xl interface{}) interface{} {
+	switch SizeMan.GetBreakpoint() {
 	case BreakpointXS:
 		return xs
 	case BreakpointSM:
@@ -482,8 +482,8 @@ func (sm *SizeManager) ResponsiveValue(xs, sm, md, lg, xl interface{}) interface
 }
 
 // ResponsiveInt returns different int values based on breakpoint
-func (sm *SizeManager) ResponsiveInt(xs, sm, md, lg, xl int) int {
-	result := sm.ResponsiveValue(xs, sm, md, lg, xl)
+func (sizeManager *SizeManager) ResponsiveInt(xs, sm, md, lg, xl int) int {
+	result := sizeManager.ResponsiveValue(xs, sm, md, lg, xl)
 	if intResult, ok := result.(int); ok {
 		return intResult
 	}
@@ -491,8 +491,8 @@ func (sm *SizeManager) ResponsiveInt(xs, sm, md, lg, xl int) int {
 }
 
 // ResponsiveString returns different string values based on breakpoint
-func (sm *SizeManager) ResponsiveString(xs, sm, md, lg, xl string) string {
-	result := sm.ResponsiveValue(xs, sm, md, lg, xl)
+func (sizeManager *SizeManager) ResponsiveString(xs, sm, md, lg, xl string) string {
+	result := sizeManager.ResponsiveValue(xs, sm, md, lg, xl)
 	if stringResult, ok := result.(string); ok {
 		return stringResult
 	}

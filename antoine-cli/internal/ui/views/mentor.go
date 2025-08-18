@@ -1,15 +1,12 @@
 package views
 
 import (
-	"context"
 	"fmt"
-	"strings"
-	"time"
-
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"strings"
 
 	"antoine-cli/internal/core"
 	"antoine-cli/pkg/ascii"
@@ -244,8 +241,8 @@ func (m *mentorModel) updateViewport() {
 
 func (m mentorModel) sendToAntoine(userInput string) tea.Cmd {
 	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-		defer cancel()
+		//ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		//defer cancel()
 
 		// En una implementación real, aquí se enviaría el mensaje a Antoine
 		// Por ahora, simular una respuesta

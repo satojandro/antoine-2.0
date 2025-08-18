@@ -49,6 +49,7 @@ type searchModel struct {
 	options     *SearchOptions
 	width       int
 	height      int
+	client      *core.AntoineClient
 }
 
 type searchCompleteMsg struct {
@@ -141,6 +142,7 @@ func (sv *SearchView) createSearchModel(searchType string, options *SearchOption
 		searchType:  searchType,
 		options:     options,
 		loading:     false,
+		client:      sv.client,
 	}
 }
 
@@ -269,7 +271,7 @@ func (m searchModel) performSearch(query string) tea.Cmd {
 
 		if m.searchType == "hackathons" {
 			// Buscar hackathons
-			hackathons, searchErr := sv.client.SearchHackathons(ctx, query, filters)
+			hackathons, searchErr := m.client.SearchHackathons(ctx, query, filters)
 			results = hackathons
 			err = searchErr
 		} else {
@@ -281,7 +283,7 @@ func (m searchModel) performSearch(query string) tea.Cmd {
 				filters["category"] = strings.Split(m.options.Category, ",")
 			}
 
-			projects, searchErr := sv.client.SearchProjects(ctx, query, filters)
+			projects, searchErr := m.client.SearchProjects(ctx, query, filters)
 			results = projects
 			err = searchErr
 		}

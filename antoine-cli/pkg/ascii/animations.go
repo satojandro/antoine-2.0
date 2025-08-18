@@ -414,8 +414,9 @@ func (a *Animation) SetSpeed(speed time.Duration) {
 // Animated logo functions for Antoine CLI
 
 // GetAnimatedLogo returns an animated version of the Antoine logo
-func GetAnimatedLogo(size LogoSize, currentTime time.Time) string {
-	baseArt := GetLogo(size)
+// GetAnimatedLogo returns an animated version of the Antoine logo
+func GetAnimatedLogo(size int, currentTime time.Time) string {
+	baseArt := GetLogo(size) // Cambiado LogoSize por int
 	if baseArt == "" {
 		return ""
 	}
@@ -528,16 +529,16 @@ func StatusAnimation(status string, currentTime time.Time) string {
 	switch status {
 	case "loading":
 		indicators := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
-		indicator = indicators[phase%len(indicators)]
+		indicator = indicators[int(phase)%len(indicators)] // Conversión a int
 	case "success":
 		indicators := []string{"✓", "✓", "✓", "✓"}
-		indicator = indicators[phase]
+		indicator = indicators[int(phase)]
 	case "error":
 		indicators := []string{"✗", "✗", "✗", "✗"}
-		indicator = indicators[phase]
+		indicator = indicators[int(phase)]
 	case "warning":
 		indicators := []string{"⚠", "⚠", " ", " "}
-		indicator = indicators[phase]
+		indicator = indicators[int(phase)]
 	default:
 		indicator = "●"
 	}
@@ -550,7 +551,7 @@ func RainbowText(text string, currentTime time.Time) string {
 	// Simulate rainbow effect with different Unicode characters
 	rainbowChars := [][]string{
 		{"▓", "▓", "▓"}, // Red
-		{"▒", "▒", "▒"}, // Orange  
+		{"▒", "▒", "▒"}, // Orange
 		{"░", "░", "░"}, // Yellow
 		{"▓", "▒", "░"}, // Green
 		{"▒", "░", "▓"}, // Blue

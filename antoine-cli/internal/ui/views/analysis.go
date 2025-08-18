@@ -47,6 +47,7 @@ type analysisModel struct {
 	step     string
 	width    int
 	height   int
+	client   *core.AntoineClient
 }
 
 type analysisCompleteMsg struct {
@@ -101,6 +102,7 @@ func (av *AnalysisView) createAnalysisModel(options *AnalysisOptions) analysisMo
 		options:  options,
 		loading:  true,
 		step:     "Initializing analysis...",
+		client:   av.client,
 	}
 }
 
@@ -201,8 +203,10 @@ func (m analysisModel) performAnalysis() tea.Cmd {
 
 		for i, step := range steps {
 			time.Sleep(500 * time.Millisecond) // Simular trabajo
-			progress := float64(i+1) / float64(len(steps))
+			//progress := float64(i+1) / float64(len(steps))
 			// En una implementación real, esto se enviaría a través de un canal
+			_ = step // Para evitar el error de variable no utilizada
+			_ = i
 		}
 
 		// Crear opciones de análisis
@@ -215,7 +219,8 @@ func (m analysisModel) performAnalysis() tea.Cmd {
 			analysisOptions.Focus = strings.Split(m.options.Focus, ",")
 		}
 
-		result, err := av.client.AnalyzeRepository(ctx, m.repoURL, analysisOptions)
+		//result, err := av.client.AnalyzeRepository(ctx, m.repoURL, analysisOptions)
+		result, err := m.client.AnalyzeRepository(ctx, m.repoURL, analysisOptions)
 		return analysisCompleteMsg{result: result, err: err}
 	}
 }
