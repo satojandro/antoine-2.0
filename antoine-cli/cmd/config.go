@@ -12,6 +12,14 @@ var configCmd = &cobra.Command{
 	Long:  `Configure API keys, preferences, and settings for optimal Antoine experience.`,
 }
 
+var trendsCmd = &cobra.Command{
+	Use:   "trends",
+	Short: "Show current tech trends",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Current tech trends: AI, Blockchain, Web3, IoT, Edge Computing")
+	},
+}
+
 var configShowCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Show current configuration",

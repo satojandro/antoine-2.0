@@ -173,8 +173,8 @@ func KebabCase(s string) string {
 
 // Slice utilities
 
-// Contains checks if a slice contains a specific item
-func Contains[T comparable](slice []T, item T) bool {
+// ContainsInt checks if an int slice contains a specific item
+func ContainsInt(slice []int, item int) bool {
 	for _, v := range slice {
 		if v == item {
 			return true
@@ -199,10 +199,10 @@ func ContainsString(slice []string, item string, caseInsensitive bool) bool {
 	return false
 }
 
-// UniqueSlice removes duplicates from a slice
-func UniqueSlice[T comparable](slice []T) []T {
-	seen := make(map[T]bool)
-	var result []T
+// UniqueStrings removes duplicates from a string slice
+func UniqueStrings(slice []string) []string {
+	seen := make(map[string]bool)
+	var result []string
 
 	for _, item := range slice {
 		if !seen[item] {
@@ -214,9 +214,24 @@ func UniqueSlice[T comparable](slice []T) []T {
 	return result
 }
 
-// FilterSlice filters a slice based on a predicate function
-func FilterSlice[T any](slice []T, predicate func(T) bool) []T {
-	var result []T
+// UniqueInts removes duplicates from an int slice
+func UniqueInts(slice []int) []int {
+	seen := make(map[int]bool)
+	var result []int
+
+	for _, item := range slice {
+		if !seen[item] {
+			seen[item] = true
+			result = append(result, item)
+		}
+	}
+
+	return result
+}
+
+// FilterStrings filters a string slice based on a predicate function
+func FilterStrings(slice []string, predicate func(string) bool) []string {
+	var result []string
 	for _, item := range slice {
 		if predicate(item) {
 			result = append(result, item)
@@ -225,17 +240,37 @@ func FilterSlice[T any](slice []T, predicate func(T) bool) []T {
 	return result
 }
 
-// MapSlice transforms a slice using a mapper function
-func MapSlice[T any, R any](slice []T, mapper func(T) R) []R {
-	result := make([]R, len(slice))
+// FilterInts filters an int slice based on a predicate function
+func FilterInts(slice []int, predicate func(int) bool) []int {
+	var result []int
+	for _, item := range slice {
+		if predicate(item) {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+// MapStrings transforms a string slice using a mapper function
+func MapStrings(slice []string, mapper func(string) string) []string {
+	result := make([]string, len(slice))
 	for i, item := range slice {
 		result[i] = mapper(item)
 	}
 	return result
 }
 
-// ReduceSlice reduces a slice to a single value using a reducer function
-func ReduceSlice[T any, R any](slice []T, initial R, reducer func(R, T) R) R {
+// MapInts transforms an int slice using a mapper function
+func MapInts(slice []int, mapper func(int) int) []int {
+	result := make([]int, len(slice))
+	for i, item := range slice {
+		result[i] = mapper(item)
+	}
+	return result
+}
+
+// ReduceStrings reduces a string slice to a single value using a reducer function
+func ReduceStrings(slice []string, initial string, reducer func(string, string) string) string {
 	result := initial
 	for _, item := range slice {
 		result = reducer(result, item)
@@ -243,13 +278,22 @@ func ReduceSlice[T any, R any](slice []T, initial R, reducer func(R, T) R) R {
 	return result
 }
 
-// ChunkSlice splits a slice into chunks of specified size
-func ChunkSlice[T any](slice []T, chunkSize int) [][]T {
+// ReduceInts reduces an int slice to a single value using a reducer function
+func ReduceInts(slice []int, initial int, reducer func(int, int) int) int {
+	result := initial
+	for _, item := range slice {
+		result = reducer(result, item)
+	}
+	return result
+}
+
+// ChunkStrings splits a string slice into chunks of specified size
+func ChunkStrings(slice []string, chunkSize int) [][]string {
 	if chunkSize <= 0 {
-		return [][]T{slice}
+		return [][]string{slice}
 	}
 
-	var chunks [][]T
+	var chunks [][]string
 	for i := 0; i < len(slice); i += chunkSize {
 		end := i + chunkSize
 		if end > len(slice) {
@@ -261,16 +305,50 @@ func ChunkSlice[T any](slice []T, chunkSize int) [][]T {
 	return chunks
 }
 
-// ReverseSlice reverses a slice in place
-func ReverseSlice[T any](slice []T) {
+// ChunkInts splits an int slice into chunks of specified size
+func ChunkInts(slice []int, chunkSize int) [][]int {
+	if chunkSize <= 0 {
+		return [][]int{slice}
+	}
+
+	var chunks [][]int
+	for i := 0; i < len(slice); i += chunkSize {
+		end := i + chunkSize
+		if end > len(slice) {
+			end = len(slice)
+		}
+		chunks = append(chunks, slice[i:end])
+	}
+
+	return chunks
+}
+
+// ReverseStrings reverses a string slice in place
+func ReverseStrings(slice []string) {
 	for i := 0; i < len(slice)/2; i++ {
 		j := len(slice) - 1 - i
 		slice[i], slice[j] = slice[j], slice[i]
 	}
 }
 
-// ShuffleSlice shuffles a slice randomly
-func ShuffleSlice[T any](slice []T) {
+// ReverseInts reverses an int slice in place
+func ReverseInts(slice []int) {
+	for i := 0; i < len(slice)/2; i++ {
+		j := len(slice) - 1 - i
+		slice[i], slice[j] = slice[j], slice[i]
+	}
+}
+
+// ShuffleStrings shuffles a string slice randomly
+func ShuffleStrings(slice []string) {
+	for i := range slice {
+		j := i + int(GenerateRandomInt(int64(len(slice)-i)))
+		slice[i], slice[j] = slice[j], slice[i]
+	}
+}
+
+// ShuffleInts shuffles an int slice randomly
+func ShuffleInts(slice []int) {
 	for i := range slice {
 		j := i + int(GenerateRandomInt(int64(len(slice)-i)))
 		slice[i], slice[j] = slice[j], slice[i]
@@ -279,9 +357,9 @@ func ShuffleSlice[T any](slice []T) {
 
 // Map utilities
 
-// MergeMap merges multiple maps into one (later maps override earlier ones)
-func MergeMap[K comparable, V any](maps ...map[K]V) map[K]V {
-	result := make(map[K]V)
+// MergeStringMaps merges multiple string maps into one (later maps override earlier ones)
+func MergeStringMaps(maps ...map[string]string) map[string]string {
+	result := make(map[string]string)
 
 	for _, m := range maps {
 		for k, v := range m {
@@ -292,27 +370,40 @@ func MergeMap[K comparable, V any](maps ...map[K]V) map[K]V {
 	return result
 }
 
-// MapKeys returns all keys from a map
-func MapKeys[K comparable, V any](m map[K]V) []K {
-	keys := make([]K, 0, len(m))
+// MergeInterfaceMaps merges multiple interface{} maps into one
+func MergeInterfaceMaps(maps ...map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+
+	for _, m := range maps {
+		for k, v := range m {
+			result[k] = v
+		}
+	}
+
+	return result
+}
+
+// StringMapKeys returns all keys from a string map
+func StringMapKeys(m map[string]string) []string {
+	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}
 	return keys
 }
 
-// MapValues returns all values from a map
-func MapValues[K comparable, V any](m map[K]V) []V {
-	values := make([]V, 0, len(m))
+// StringMapValues returns all values from a string map
+func StringMapValues(m map[string]string) []string {
+	values := make([]string, 0, len(m))
 	for _, v := range m {
 		values = append(values, v)
 	}
 	return values
 }
 
-// InvertMap inverts a map (keys become values, values become keys)
-func InvertMap[K, V comparable](m map[K]V) map[V]K {
-	result := make(map[V]K)
+// InvertStringMap inverts a string map (keys become values, values become keys)
+func InvertStringMap(m map[string]string) map[string]string {
+	result := make(map[string]string)
 	for k, v := range m {
 		result[v] = k
 	}
@@ -595,15 +686,6 @@ func GenerateUUID() string {
 
 // JSON utilities
 
-// PrettyPrintJSON pretty prints JSON with indentation
-func PrettyPrintJSON(data interface{}) (string, error) {
-	bytes, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		return "", err
-	}
-	return string(bytes), nil
-}
-
 // CompactJSON compacts JSON by removing unnecessary whitespace
 func CompactJSON(jsonStr string) (string, error) {
 	var data interface{}
@@ -718,24 +800,22 @@ func SortStringSlice(slice []string, ascending bool, caseInsensitive bool) {
 	})
 }
 
-// SortMapByKeys sorts a map by its keys and returns sorted key-value pairs
-func SortMapByKeys[K comparable, V any](m map[K]V, keyLess func(K, K) bool) []struct {
-	Key   K
-	Value V
+// SortStringMapByKeys sorts a string map by its keys and returns sorted key-value pairs
+func SortStringMapByKeys(m map[string]string) []struct {
+	Key   string
+	Value string
 } {
-	keys := MapKeys(m)
-	sort.Slice(keys, func(i, j int) bool {
-		return keyLess(keys[i], keys[j])
-	})
+	keys := StringMapKeys(m)
+	sort.Strings(keys)
 
 	var result []struct {
-		Key   K
-		Value V
+		Key   string
+		Value string
 	}
 	for _, key := range keys {
 		result = append(result, struct {
-			Key   K
-			Value V
+			Key   string
+			Value string
 		}{Key: key, Value: m[key]})
 	}
 
@@ -749,18 +829,33 @@ func IgnoreError(fn func() error) {
 	_ = fn()
 }
 
-// Must panics if the error is not nil, otherwise returns the value
-func Must[T any](value T, err error) T {
+// MustString panics if the error is not nil, otherwise returns the string value
+func MustString(value string, err error) string {
 	if err != nil {
 		panic(err)
 	}
 	return value
 }
 
-// DefaultValue returns the default value if the original is zero
-func DefaultValue[T comparable](value, defaultValue T) T {
-	var zero T
-	if value == zero {
+// MustInt panics if the error is not nil, otherwise returns the int value
+func MustInt(value int, err error) int {
+	if err != nil {
+		panic(err)
+	}
+	return value
+}
+
+// DefaultString returns the default value if the original is empty
+func DefaultString(value, defaultValue string) string {
+	if value == "" {
+		return defaultValue
+	}
+	return value
+}
+
+// DefaultInt returns the default value if the original is zero
+func DefaultInt(value, defaultValue int) int {
+	if value == 0 {
 		return defaultValue
 	}
 	return value

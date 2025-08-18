@@ -62,12 +62,12 @@ type Cache interface {
 	Delete(key string) error
 	Clear() error
 	Keys() []string
-	Stats() CacheStats
+	Stats() CacheStatistics
 	Close() error
 }
 
-// CacheStats provides cache statistics
-type CacheStats struct {
+// CacheStatistics provides cache statistics (renamed to avoid conflict)
+type CacheStatistics struct {
 	TotalEntries   int64   `json:"total_entries"`
 	MemoryUsageMB  float64 `json:"memory_usage_mb"`
 	DiskUsageMB    float64 `json:"disk_usage_mb"`
@@ -176,7 +176,7 @@ func (cm *CacheManager) Keys() []string {
 }
 
 // Stats returns cache statistics
-func (cm *CacheManager) Stats() CacheStats {
+func (cm *CacheManager) Stats() CacheStatistics {
 	cm.mu.RLock()
 	defer cm.mu.RUnlock()
 	return cm.cache.Stats()
@@ -343,7 +343,7 @@ func (mc *MemoryCache) Keys() []string {
 }
 
 // Stats returns memory cache statistics
-func (mc *MemoryCache) Stats() CacheStats {
+func (mc *MemoryCache) Stats() CacheStatistics {
 	mc.mu.RLock()
 	defer mc.mu.RUnlock()
 
@@ -354,9 +354,9 @@ func (mc *MemoryCache) Stats() CacheStats {
 		hitRatio = float64(mc.metrics.Hits) / float64(total)
 	}
 
-	return CacheStats{
+	return CacheStatistics{
 		TotalEntries:   mc.metrics.TotalEntries,
-		MemoryUsageMB:  float64(metrics.CostAdded) / (1024 * 1024),
+		MemoryUsageMB:  float64(metrics.CostAdded()) / (1024 * 1024), // Fixed: call CostAdded as function
 		HitRatio:       hitRatio,
 		MissRatio:      1.0 - hitRatio,
 		TotalHits:      mc.metrics.Hits,
@@ -421,7 +421,7 @@ func (dc *DiskCache) Get(key string) (interface{}, bool) {
 
 	// Check expiration
 	if time.Now().After(item.ExpiresAt) {
-		os.Remove(filePath)
+		os.RemoveAll(filePath)
 		dc.metrics.Expired++
 		dc.metrics.Misses++
 		return nil, false
@@ -480,7 +480,7 @@ func (dc *DiskCache) Delete(key string) error {
 	defer dc.mu.Unlock()
 
 	filePath := dc.getFilePath(key)
-	err := os.Remove(filePath)
+	err := os.RemoveAll(filePath)
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("failed to delete cache file: %w", err)
 	}
@@ -530,7 +530,7 @@ func (dc *DiskCache) Keys() []string {
 }
 
 // Stats returns disk cache statistics
-func (dc *DiskCache) Stats() CacheStats {
+func (dc *DiskCache) Stats() CacheStatistics {
 	dc.mu.RLock()
 	defer dc.mu.RUnlock()
 
@@ -541,7 +541,7 @@ func (dc *DiskCache) Stats() CacheStats {
 		hitRatio = float64(dc.metrics.Hits) / float64(total)
 	}
 
-	return CacheStats{
+	return CacheStatistics{
 		TotalEntries:   dc.metrics.TotalEntries,
 		DiskUsageMB:    diskUsage,
 		HitRatio:       hitRatio,
@@ -677,11 +677,11 @@ func (hc *HybridCache) Keys() []string {
 }
 
 // Stats returns combined statistics from both caches
-func (hc *HybridCache) Stats() CacheStats {
+func (hc *HybridCache) Stats() CacheStatistics {
 	memStats := hc.memory.Stats()
 	diskStats := hc.disk.Stats()
 
-	return CacheStats{
+	return CacheStatistics{
 		TotalEntries:   memStats.TotalEntries + diskStats.TotalEntries,
 		MemoryUsageMB:  memStats.MemoryUsageMB,
 		DiskUsageMB:    diskStats.DiskUsageMB,
@@ -708,11 +708,11 @@ func (nc *NoOpCache) Set(key string, value interface{}, ttl time.Duration) error
 func (nc *NoOpCache) SetWithType(key string, value interface{}, itemType string, ttl time.Duration) error {
 	return nil
 }
-func (nc *NoOpCache) Delete(key string) error                                    { return nil }
-func (nc *NoOpCache) Clear() error                                               { return nil }
-func (nc *NoOpCache) Keys() []string                                             { return []string{} }
-func (nc *NoOpCache) Stats() CacheStats                                          { return CacheStats{} }
-func (nc *NoOpCache) Close() error                                               { return nil }
+func (nc *NoOpCache) Delete(key string) error { return nil }
+func (nc *NoOpCache) Clear() error            { return nil }
+func (nc *NoOpCache) Keys() []string          { return []string{} }
+func (nc *NoOpCache) Stats() CacheStatistics  { return CacheStatistics{} }
+func (nc *NoOpCache) Close() error            { return nil }
 
 // Helper functions
 
@@ -770,6 +770,6 @@ func CacheDelete(key string) error {
 	return GetGlobalCache().Delete(key)
 }
 
-func CacheStats() CacheStats {
+func CacheStats() CacheStatistics {
 	return GetGlobalCache().Stats()
 }

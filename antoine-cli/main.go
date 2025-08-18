@@ -5,11 +5,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"runtime"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"antoine-cli/cmd"
@@ -25,12 +23,12 @@ var (
 	BuildTime = "unknown"
 	GitCommit = "unknown"
 
-	// Configuration
-	configFile string
-	verbose    bool
-	quiet      bool
-	noColor    bool
-	theme      string
+	// Command line flags
+	//configFile string
+	//verbose    bool
+	//quiet      bool
+	//noColor    bool
+	//theme      string
 )
 
 func main() {
@@ -50,9 +48,10 @@ func main() {
 // initializeApp initializes the Antoine CLI application
 func initializeApp() error {
 	// Detect terminal capabilities first
-	termInfo := terminal.DetectTerminal()
+	//termInfo := terminal.DetectTerminal()
+	termInfo := terminal.SafeDetectTerminal()
 
-	// Initialize configuration
+	// Initialize configuration using the new config system
 	if err := initConfig(); err != nil {
 		return fmt.Errorf("config initialization failed: %w", err)
 	}
@@ -78,143 +77,122 @@ func initializeApp() error {
 	return nil
 }
 
-// initConfig initializes the configuration system
+// initConfig initializes the configuration system using the new consolidated config
 func initConfig() error {
-	// Set config file search paths
-	viper.SetConfigName("antoine")
-	viper.SetConfigType("yaml")
-
-	// Add config search paths
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("./configs")
-	if home, err := os.UserHomeDir(); err == nil {
-		viper.AddConfigPath(filepath.Join(home, ".antoine"))
-		viper.AddConfigPath(filepath.Join(home, ".config", "antoine"))
-	}
-
-	// Set environment variable prefix
-	viper.SetEnvPrefix("ANTOINE")
-	viper.AutomaticEnv()
-
-	// Set defaults from our config system
-	setConfigDefaults()
-
-	// If a config file is specified, use it
-	if configFile != "" {
-		viper.SetConfigFile(configFile)
-	}
-
-	// Read config file
-	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return fmt.Errorf("error reading config file: %w", err)
+	// Obtener el archivo de configuración desde la flag ya definida en cmd/root.go
+	rootCmd := cmd.GetRootCommand()
+	if configFlag := rootCmd.PersistentFlags().Lookup("config"); configFlag != nil {
+		if configFile := configFlag.Value.String(); configFile != "" {
+			viper.SetConfigFile(configFile)
 		}
-		// Config file not found is OK, we'll use defaults
+	}
+
+	// Use the new config system's LoadConfig function
+	if err := config.LoadConfig(); err != nil {
+		return fmt.Errorf("failed to load configuration: %w", err)
+	}
+
+	// Apply command line flag overrides
+	applyCommandLineOverrides()
+
+	// Validate the final configuration
+	if err := config.Validate(); err != nil {
+		return fmt.Errorf("configuration validation failed: %w", err)
 	}
 
 	return nil
 }
 
-// setConfigDefaults sets default configuration values
-func setConfigDefaults() {
-	defaults := config.GetDefaultConfig()
+// applyCommandLineOverrides applies command line flags to override config values
+func applyCommandLineOverrides() {
+	// Acceder a las flags ya definidas en cmd/root.go
+	rootCmd := cmd.GetRootCommand()
 
-	// API settings
-	viper.SetDefault("api.base_url", defaults.API.BaseURL)
-	viper.SetDefault("api.timeout", defaults.API.Timeout)
-	viper.SetDefault("api.retry_count", defaults.API.RetryCount)
+	// Obtener valores de flags usando los métodos de Cobra
+	if verboseFlag := rootCmd.PersistentFlags().Lookup("verbose"); verboseFlag != nil && verboseFlag.Changed {
+		viper.Set("logging.level", "debug")
+		viper.Set("debug.enabled", true)
+		viper.Set("debug.verbose_logging", true)
+	}
 
-	// UI settings
-	viper.SetDefault("ui.theme", defaults.UI.Theme)
-	viper.SetDefault("ui.animations", defaults.UI.Animations)
-	viper.SetDefault("ui.colors", defaults.UI.Colors)
-	viper.SetDefault("ui.unicode_support", defaults.UI.UnicodeSupport)
+	if quietFlag := rootCmd.PersistentFlags().Lookup("quiet"); quietFlag != nil && quietFlag.Changed {
+		viper.Set("logging.level", "error")
+	}
 
-	// Logging settings
-	viper.SetDefault("logging.level", defaults.Logging.Level)
-	viper.SetDefault("logging.format", defaults.Logging.Format)
-	viper.SetDefault("logging.output", defaults.Logging.Output)
+	if noColorFlag := rootCmd.PersistentFlags().Lookup("no-color"); noColorFlag != nil && noColorFlag.Changed {
+		viper.Set("ui.colors", false)
+	}
 
-	// Cache settings
-	viper.SetDefault("cache.enabled", defaults.Cache.Enabled)
-	viper.SetDefault("cache.type", defaults.Cache.Type)
-	viper.SetDefault("cache.max_size_mb", defaults.Cache.MaxSizeMB)
-
-	// Analytics settings
-	viper.SetDefault("analytics.enabled", defaults.Analytics.Enabled)
-	viper.SetDefault("analytics.anonymous", defaults.Analytics.Anonymous)
+	if themeFlag := rootCmd.PersistentFlags().Lookup("theme"); themeFlag != nil && themeFlag.Changed {
+		viper.Set("ui.theme", themeFlag.Value.String())
+	}
 }
 
 // initLogging initializes the logging system
 func initLogging() error {
+	// Get configuration values
+	cfg := config.Get()
+
 	logConfig := utils.LoggerConfig{
-		Level:       utils.LogLevel(viper.GetString("logging.level")),
-		Format:      utils.LogFormat(viper.GetString("logging.format")),
-		Output:      utils.LogOutput(viper.GetString("logging.output")),
-		Development: viper.GetBool("debug.enabled"),
-		Caller:      viper.GetBool("logging.caller"),
-		StackTrace:  viper.GetBool("logging.stack_trace"),
+		Level:       utils.LogLevel(cfg.Logging.Level),
+		Format:      utils.LogFormat(cfg.Logging.Format),
+		Output:      utils.LogOutput(cfg.Logging.Output),
+		Development: cfg.Debug.Enabled,
+		Caller:      cfg.Logging.Caller,
+		StackTrace:  cfg.Logging.StackTrace,
 	}
 
 	// Set file logging configuration
-	logConfig.File.Path = viper.GetString("logging.file.path")
-	logConfig.File.MaxSizeMB = viper.GetInt("logging.file.max_size_mb")
-	logConfig.File.MaxBackups = viper.GetInt("logging.file.max_backups")
-	logConfig.File.MaxAgeDays = viper.GetInt("logging.file.max_age_days")
-	logConfig.File.Compress = viper.GetBool("logging.file.compress")
-
-	// Override with command line flags
-	if verbose {
-		logConfig.Level = utils.LogLevelDebug
-	}
-	if quiet {
-		logConfig.Level = utils.LogLevelError
-	}
+	logConfig.File.Path = cfg.Logging.File.Path
+	logConfig.File.MaxSizeMB = cfg.Logging.File.MaxSizeMB
+	logConfig.File.MaxBackups = cfg.Logging.File.MaxBackups
+	logConfig.File.MaxAgeDays = cfg.Logging.File.MaxAgeDays
+	logConfig.File.Compress = cfg.Logging.File.Compress
 
 	return utils.InitGlobalLogger(logConfig)
 }
 
 // initCache initializes the cache system
 func initCache() error {
-	if !viper.GetBool("cache.enabled") {
+	cfg := config.Get()
+
+	if !cfg.Cache.Enabled {
 		// Initialize with disabled cache
 		return utils.InitGlobalCache(utils.CacheConfig{Enabled: false})
 	}
 
 	cacheConfig := utils.CacheConfig{
 		Enabled:         true,
-		Type:            utils.CacheType(viper.GetString("cache.type")),
-		MaxSizeMB:       viper.GetInt64("cache.max_size_mb"),
-		MaxEntries:      viper.GetInt64("cache.max_entries"),
-		CleanupInterval: viper.GetDuration("cache.cleanup_interval"),
+		Type:            utils.CacheType(cfg.Cache.Type),
+		MaxSizeMB:       int64(cfg.Cache.MaxSizeMB),
+		MaxEntries:      int64(cfg.Cache.MaxSize),
+		CleanupInterval: parseDurationSafely(cfg.Cache.CleanupInterval),
 		TTL:             make(map[string]time.Duration),
 	}
 
-	// Set TTL values
-	cacheConfig.TTL["hackathons"] = viper.GetDuration("cache.ttl.hackathons")
-	cacheConfig.TTL["projects"] = viper.GetDuration("cache.ttl.projects")
-	cacheConfig.TTL["repositories"] = viper.GetDuration("cache.ttl.repositories")
-	cacheConfig.TTL["trends"] = viper.GetDuration("cache.ttl.trends")
-	cacheConfig.TTL["analysis"] = viper.GetDuration("cache.ttl.analysis")
+	// Set TTL values - convert from string to time.Duration
+	if cfg.Cache.TTLByType != nil {
+		for key, ttlStr := range cfg.Cache.TTLByType {
+			if duration := parseDurationSafely(ttlStr); duration > 0 {
+				cacheConfig.TTL[key] = duration
+			}
+		}
+	}
 
 	// Disk cache settings
-	cacheConfig.Disk.Path = viper.GetString("cache.disk.path")
-	cacheConfig.Disk.Compression = viper.GetBool("cache.disk.compression")
+	cacheConfig.Disk.Path = cfg.Cache.Disk.Path
+	cacheConfig.Disk.Compression = cfg.Cache.Disk.Compression
 
 	return utils.InitGlobalCache(cacheConfig)
 }
 
 // setupGlobalEnvironment sets up global environment variables and settings
 func setupGlobalEnvironment(termInfo *terminal.TerminalInfo) {
-	// Handle color settings
-	if noColor || !termInfo.SupportsColor {
-		os.Setenv("NO_COLOR", "1")
-		viper.Set("ui.colors", false)
-	}
+	cfg := config.Get()
 
-	// Handle theme settings
-	if theme != "" {
-		viper.Set("ui.theme", theme)
+	// Handle color settings
+	if !cfg.UI.Colors || !termInfo.SupportsColor {
+		os.Setenv("NO_COLOR", "1")
 	}
 
 	// Set terminal size for responsive design
@@ -231,13 +209,20 @@ func setupGlobalEnvironment(termInfo *terminal.TerminalInfo) {
 
 // shouldShowWelcome determines if we should show the welcome message
 func shouldShowWelcome() bool {
+	// Obtener flags del comando root
+	rootCmd := cmd.GetRootCommand()
+
+	// Verificar flag quiet
+	quietFlag := rootCmd.PersistentFlags().Lookup("quiet")
+	isQuiet := quietFlag != nil && quietFlag.Changed
+
 	// Don't show welcome if:
 	// - Running in non-interactive mode
 	// - Quiet flag is set
 	// - NO_COLOR is set (might be in a script)
 	// - Not a TTY
 
-	if quiet || os.Getenv("NO_COLOR") != "" {
+	if isQuiet || os.Getenv("NO_COLOR") != "" {
 		return false
 	}
 
@@ -267,10 +252,12 @@ func shouldShowWelcome() bool {
 
 // displayWelcome shows the welcome message
 func displayWelcome(termInfo *terminal.TerminalInfo) {
+	cfg := config.Get()
+
 	// Only show welcome for interactive sessions and first-time usage
 	width := termInfo.Width
-	if width > 120 {
-		width = 120
+	if width > cfg.UI.MaxWidth {
+		width = cfg.UI.MaxWidth
 	}
 
 	// Create a simple welcome banner
@@ -278,109 +265,105 @@ func displayWelcome(termInfo *terminal.TerminalInfo) {
 	fmt.Println(welcome)
 
 	// Show quick usage hint
-	if termInfo.SupportsColor {
-		hint := terminal.Cyan("💡 Tip: Use 'antoine --help' to see all available commands")
+	if cfg.UI.Colors && termInfo.SupportsColor {
+		colorize := terminal.GetGlobalColorize()
+		hint := colorize.Cyan("💡 Tip: Use 'antoine --help' to see all available commands")
 		fmt.Println(hint)
 	} else {
-		fmt.Println("Tip: Use 'antoine --help' to see all available commands")
+		fmt.Println("💡 Tip: Use 'antoine --help' to see all available commands")
 	}
 
 	fmt.Println() // Add some spacing
 }
 
-// setupRootCommand configures the root command with global flags
-func init() {
-	// Get the root command from cmd package
-	rootCmd := cmd.GetRootCommand()
+//// setupRootCommand configures the root command with global flags
+//func init() {
+//	// Get the root command from cmd package
+//	rootCmd := cmd.GetRootCommand()
+//
+//	// Add global flags
+//	rootCmd.PersistentFlags().StringVar(&configFile, "config", "",
+//		"config file (default searches for antoine.yaml in current dir and $HOME/.antoine/)")
+//	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false,
+//		"enable verbose output")
+//	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false,
+//		"suppress non-essential output")
+//	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false,
+//		"disable colored output")
+//	rootCmd.PersistentFlags().StringVar(&theme, "theme", "",
+//		"UI theme (dark, light, minimal)")
+//
+//	// Set version information
+//	rootCmd.Version = fmt.Sprintf("%s (built %s, commit %s)", Version, BuildTime, GitCommit)
+//
+//	// Add pre-run hook for validation
+//	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+//		// Validate theme if specified
+//		if theme != "" {
+//			validThemes := []string{"dark", "light", "minimal"}
+//			valid := false
+//			for _, validTheme := range validThemes {
+//				if theme == validTheme {
+//					valid = true
+//					break
+//				}
+//			}
+//			if !valid {
+//				return fmt.Errorf("invalid theme '%s'. Valid themes: %v", theme, validThemes)
+//			}
+//		}
+//
+//		return nil
+//	}
+//
+//	// Add completion command
+//	rootCmd.AddCommand(&cobra.Command{
+//		Use:   "completion [bash|zsh|fish|powershell]",
+//		Short: "Generate shell completion scripts",
+//		Long: `Generate shell completion scripts for Antoine CLI.
+//
+//The command for each shell will print completion script to stdout.
+//You can source it or write it to a file and source it from your shell profile.`,
+//		DisableFlagsInUseLine: true,
+//		ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
+//		Args:                  cobra.ExactValidArgs(1),
+//		Run: func(cmd *cobra.Command, args []string) {
+//			switch args[0] {
+//			case "bash":
+//				cmd.Root().GenBashCompletion(os.Stdout)
+//			case "zsh":
+//				cmd.Root().GenZshCompletion(os.Stdout)
+//			case "fish":
+//				cmd.Root().GenFishCompletion(os.Stdout, true)
+//			case "powershell":
+//				cmd.Root().GenPowerShellCompletion(os.Stdout)
+//			}
+//		},
+//	})
+//}
 
-	// Add global flags
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "",
-		"config file (default searches for antoine.yaml in current dir and $HOME/.antoine/)")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false,
-		"enable verbose output")
-	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false,
-		"suppress non-essential output")
-	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false,
-		"disable colored output")
-	rootCmd.PersistentFlags().StringVar(&theme, "theme", "",
-		"UI theme (dark, light, minimal)")
-
-	// Bind flags to viper
-	viper.BindPFlag("logging.level", rootCmd.PersistentFlags().Lookup("verbose"))
-	viper.BindPFlag("ui.colors", rootCmd.PersistentFlags().Lookup("no-color"))
-	viper.BindPFlag("ui.theme", rootCmd.PersistentFlags().Lookup("theme"))
-
-	// Set version information
-	rootCmd.Version = fmt.Sprintf("%s (built %s, commit %s)", Version, BuildTime, GitCommit)
-
-	// Add pre-run hook for validation
-	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		// Validate theme if specified
-		if theme != "" {
-			validThemes := []string{"dark", "light", "minimal"}
-			valid := false
-			for _, validTheme := range validThemes {
-				if theme == validTheme {
-					valid = true
-					break
-				}
-			}
-			if !valid {
-				return fmt.Errorf("invalid theme '%s'. Valid themes: %v", theme, validThemes)
-			}
-		}
-
-		return nil
-	}
-
-	// Add completion command
-	rootCmd.AddCommand(&cobra.Command{
-		Use:   "completion [bash|zsh|fish|powershell]",
-		Short: "Generate shell completion scripts",
-		Long: `Generate shell completion scripts for Antoine CLI.
-
-The command for each shell will print completion script to stdout.
-You can source it or write it to a file and source it from your shell profile.`,
-		DisableFlagsInUseLine: true,
-		ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
-		Args:                  cobra.ExactValidArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			switch args[0] {
-			case "bash":
-				cmd.Root().GenBashCompletion(os.Stdout)
-			case "zsh":
-				cmd.Root().GenZshCompletion(os.Stdout)
-			case "fish":
-				cmd.Root().GenFishCompletion(os.Stdout, true)
-			case "powershell":
-				cmd.Root().GenPowerShellCompletion(os.Stdout)
-			}
-		},
-	})
-}
-
-// Emergency error handler for panics
-func init() {
-	// Set up panic recovery
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Fprintf(os.Stderr, "Antoine CLI encountered a fatal error: %v\n", r)
-
-			// Try to log the panic if logging is initialized
-			if logger := utils.GetGlobalLogger(); logger != nil {
-				logger.WithFields(map[string]interface{}{
-					"panic":   r,
-					"runtime": runtime.Version(),
-					"goos":    runtime.GOOS,
-					"goarch":  runtime.GOARCH,
-					"version": Version,
-				}).Error("Application panic")
-			}
-
-			os.Exit(1)
-		}
-	}()
-}
+//// Emergency error handler for panics
+//func init() {
+//	// Set up panic recovery
+//	defer func() {
+//		if r := recover(); r != nil {
+//			fmt.Fprintf(os.Stderr, "Antoine CLI encountered a fatal error: %v\n", r)
+//
+//			// Try to log the panic if logging is initialized
+//			if logger := utils.GetGlobalLogger(); logger != nil {
+//				logger.WithFields(map[string]interface{}{
+//					"panic":   r,
+//					"runtime": runtime.Version(),
+//					"goos":    runtime.GOOS,
+//					"goarch":  runtime.GOARCH,
+//					"version": Version,
+//				}).Error("Application panic")
+//			}
+//
+//			os.Exit(1)
+//		}
+//	}()
+//}
 
 // Helper functions for environment detection
 
@@ -410,35 +393,10 @@ func isRunningInContainer() bool {
 	return false
 }
 
-// Configuration validation helpers
-
-// validateConfig validates the loaded configuration
-func validateConfig() error {
-	validator := utils.NewConfigValidation()
-
-	// Validate logging configuration
-	validator.ValidateLogLevel(viper.GetString("logging.level"))
-	validator.ValidateLogFormat(viper.GetString("logging.format"))
-	validator.ValidateLogOutput(viper.GetString("logging.output"))
-
-	// Validate cache configuration
-	validator.ValidateCacheType(viper.GetString("cache.type"))
-
-	// Validate UI configuration
-	validator.ValidateUITheme(viper.GetString("ui.theme"))
-
-	if validator.HasErrors() {
-		return fmt.Errorf("configuration validation failed: %v", validator.Errors())
-	}
-
-	return nil
-}
-
-// Runtime information for debugging
-
 // getRuntimeInfo returns runtime information for debugging
 func getRuntimeInfo() map[string]interface{} {
 	termInfo := terminal.DetectTerminal()
+	cfg := config.Get()
 
 	return map[string]interface{}{
 		"version":    Version,
@@ -460,35 +418,48 @@ func getRuntimeInfo() map[string]interface{} {
 			"container": isRunningInContainer(),
 			"no_color":  os.Getenv("NO_COLOR") != "",
 		},
+		"config": map[string]interface{}{
+			"file":  viper.ConfigFileUsed(),
+			"theme": cfg.UI.Theme,
+			"cache": cfg.Cache.Enabled,
+		},
 	}
 }
 
-// Debug command for troubleshooting
-func init() {
-	debugCmd := &cobra.Command{
-		Use:    "debug",
-		Short:  "Show debug information",
-		Hidden: true, // Hide from main help
-		Run: func(cmd *cobra.Command, args []string) {
-			info := getRuntimeInfo()
+//// Debug command for troubleshooting
+//func init() {
+//	debugCmd := &cobra.Command{
+//		Use:    "debug",
+//		Short:  "Show debug information",
+//		Hidden: true, // Hide from main help
+//		Run: func(cmd *cobra.Command, args []string) {
+//			info := getRuntimeInfo()
+//
+//			if data, err := utils.PrettyPrintJSON(info); err == nil {
+//				fmt.Println(data)
+//			} else {
+//				fmt.Printf("Runtime Info: %+v\n", info)
+//			}
+//
+//			// Show configuration using the new config system
+//			fmt.Println("\nConfiguration:")
+//			config.Show() // Use the enhanced Show() method
+//
+//			// Show cache stats if available
+//			if cache := utils.GetGlobalCache(); cache != nil {
+//				stats := cache.Stats()
+//				fmt.Printf("\nCache stats: %+v\n", stats)
+//			}
+//		},
+//	}
+//
+//	cmd.GetRootCommand().AddCommand(debugCmd)
+//}
 
-			if data, err := utils.PrettyPrintJSON(info); err == nil {
-				fmt.Println(data)
-			} else {
-				fmt.Printf("Runtime Info: %+v\n", info)
-			}
-
-			// Show configuration
-			fmt.Println("\nConfiguration:")
-			fmt.Printf("Config file: %s\n", viper.ConfigFileUsed())
-
-			// Show cache stats if available
-			if cache := utils.GetGlobalCache(); cache != nil {
-				stats := cache.Stats()
-				fmt.Printf("Cache stats: %+v\n", stats)
-			}
-		},
+// Helper function to safely parse duration strings
+func parseDurationSafely(durationStr string) time.Duration {
+	if duration, err := time.ParseDuration(durationStr); err == nil {
+		return duration
 	}
-
-	cmd.GetRootCommand().AddCommand(debugCmd)
+	return 0
 }

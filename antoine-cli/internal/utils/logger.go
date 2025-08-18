@@ -231,10 +231,31 @@ func (f *AntoineTextFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	return []byte(formatted), nil
 }
 
-// isTerminal checks if output is a terminal
+// isTerminal checks if output is a terminal using environment detection
 func isTerminal() bool {
-	fileInfo, _ := os.Stdout.Stat()
-	return (fileInfo.Mode() & os.ModeCharDevice) != 0
+	// Simple and reliable approach: check environment variables
+
+	// If NO_COLOR is set, assume no terminal colors
+	if os.Getenv("NO_COLOR") != "" {
+		return false
+	}
+
+	// If TERM is set and not "dumb", assume terminal supports colors
+	term := os.Getenv("TERM")
+	if term != "" && term != "dumb" {
+		return true
+	}
+
+	// Check for common CI environments (usually no color support)
+	ciEnvs := []string{"CI", "GITHUB_ACTIONS", "GITLAB_CI", "CIRCLECI", "JENKINS"}
+	for _, env := range ciEnvs {
+		if os.Getenv(env) != "" {
+			return false
+		}
+	}
+
+	// Default to true for local development
+	return true
 }
 
 // ContextLogger provides structured logging with context
@@ -388,37 +409,40 @@ func (cl *ContextLogger) LogDuration(operation string, start time.Time) {
 
 // HTTP request logging
 func (l *Logger) LogHTTPRequest(method, url string, statusCode int, duration time.Duration) {
-	level := logrus.InfoLevel
-	if statusCode >= 400 {
-		level = logrus.WarnLevel
-	}
-	if statusCode >= 500 {
-		level = logrus.ErrorLevel
-	}
-
-	l.WithFields(map[string]interface{}{
+	entry := l.WithFields(map[string]interface{}{
 		"method":      method,
 		"url":         url,
 		"status_code": statusCode,
 		"duration":    duration.String(),
 		"duration_ms": duration.Milliseconds(),
-	}).Log(level, "HTTP request completed")
+	})
+
+	message := "HTTP request completed"
+	if statusCode >= 500 {
+		entry.Error(message)
+	} else if statusCode >= 400 {
+		entry.Warn(message)
+	} else {
+		entry.Info(message)
+	}
 }
 
 // MCP operation logging
 func (l *Logger) LogMCPOperation(server, method string, success bool, duration time.Duration) {
-	level := logrus.InfoLevel
-	if !success {
-		level = logrus.ErrorLevel
-	}
-
-	l.WithFields(map[string]interface{}{
+	entry := l.WithFields(map[string]interface{}{
 		"mcp_server":  server,
 		"method":      method,
 		"success":     success,
 		"duration":    duration.String(),
 		"duration_ms": duration.Milliseconds(),
-	}).Log(level, "MCP operation completed")
+	})
+
+	message := "MCP operation completed"
+	if success {
+		entry.Info(message)
+	} else {
+		entry.Error(message)
+	}
 }
 
 // Error logging with stack trace
@@ -559,4 +583,10 @@ func LogMCPOperation(server, method string, success bool, duration time.Duration
 
 func LogError(err error, message string, fields map[string]interface{}) {
 	GetGlobalLogger().LogError(err, message, fields)
+}
+
+// PrettyPrintJSON formats JSON for pretty printing (helper function)
+func PrettyPrintJSON(data interface{}) (string, error) {
+	// This is a placeholder - you might want to implement actual JSON formatting
+	return fmt.Sprintf("%+v", data), nil
 }

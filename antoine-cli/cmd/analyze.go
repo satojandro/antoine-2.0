@@ -40,8 +40,9 @@ var analyzeTrendsCmd = &cobra.Command{
 	Short: "Analyze technology and market trends",
 
 	Run: func(cmd *cobra.Command, args []string) {
+		techSlice, _ := cmd.Flags().GetStringSlice("tech")
 		options := &views.AnalysisOptions{
-			Tech:      cmd.Flag("tech").Value.String(),
+			Tech:      techSlice,
 			Timeframe: cmd.Flag("timeframe").Value.String(),
 			Metrics:   cmd.Flag("include-metrics").Changed,
 			Format:    viper.GetString("format"),

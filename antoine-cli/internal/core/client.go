@@ -21,12 +21,12 @@ type AntoineClient struct {
 }
 
 type MCPManager struct {
-	exa         *mcp.ExaClient
-	github      *mcp.GitHubClient
-	deepwiki    *mcp.DeepWikiClient
-	e2b         *mcp.E2BClient
-	browserbase *mcp.BrowserbaseClient
-	firecrawl   *mcp.FirecrawlClient
+	exa      *mcp.ExaClient
+	github   *mcp.GitHubClient
+	deepwiki *mcp.DeepWikiClient
+	e2b      *mcp.E2BClient
+	//browserbase *mcp.BrowserbaseClient
+	//firecrawl   *mcp.FirecrawlClient
 }
 
 func NewAntoineClient(cfg *config.Config) (*AntoineClient, error) {
@@ -57,29 +57,36 @@ func NewAntoineClient(cfg *config.Config) (*AntoineClient, error) {
 
 func (m *MCPManager) Connect(cfg *config.Config) error {
 	// Conectar Exa
-	if endpoint, ok := cfg.MCP.Servers["exa"]; ok {
-		if err := m.exa.Connect(endpoint); err != nil {
+	if serverConfig, ok := cfg.MCP.Servers["exa"]; ok {
+		if err := m.exa.Connect(serverConfig.Endpoint); err != nil {
 			return fmt.Errorf("failed to connect to Exa: %w", err)
 		}
 	}
 
+	//// Conectar GitHub
+	//if endpoint, ok := cfg.MCP.Servers["github"]; ok {
+	//	if err := m.github.Connect(endpoint); err != nil {
+	//		return fmt.Errorf("failed to connect to GitHub: %w", err)
+	//	}
+	//}
+
 	// Conectar GitHub
-	if endpoint, ok := cfg.MCP.Servers["github"]; ok {
-		if err := m.github.Connect(endpoint); err != nil {
+	if serverConfig, ok := cfg.MCP.Servers["github"]; ok {
+		if err := m.github.Connect(serverConfig.Endpoint); err != nil {
 			return fmt.Errorf("failed to connect to GitHub: %w", err)
 		}
 	}
 
 	// Conectar DeepWiki
-	if endpoint, ok := cfg.MCP.Servers["deepwiki"]; ok {
-		if err := m.deepwiki.Connect(endpoint); err != nil {
+	if serverConfig, ok := cfg.MCP.Servers["deepwiki"]; ok {
+		if err := m.deepwiki.Connect(serverConfig.Endpoint); err != nil {
 			return fmt.Errorf("failed to connect to DeepWiki: %w", err)
 		}
 	}
 
 	// Conectar E2B
-	if endpoint, ok := cfg.MCP.Servers["e2b"]; ok {
-		if err := m.e2b.Connect(endpoint); err != nil {
+	if serverConfig, ok := cfg.MCP.Servers["e2b"]; ok {
+		if err := m.e2b.Connect(serverConfig.Endpoint); err != nil {
 			return fmt.Errorf("failed to connect to E2B: %w", err)
 		}
 	}
